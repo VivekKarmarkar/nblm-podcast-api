@@ -1,0 +1,40 @@
+# Large binary artifacts
+*.mp3
+*.wav
+*.m4a
+*.mp4
+*.pdf
+
+# Copyright-sensitive material
+# The papers/ directory holds full PDFs of academic papers — not redistributable
+papers/
+# Per-page raw text files contain essentially the full paper text — copyright-sensitive
+reconstruction/*/*_raw.txt
+
+# Credentials and secrets
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+service-account*.json
+*_secrets.*
+
+# Python noise
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log
