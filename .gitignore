@@ -9,7 +9,8 @@
 # The papers/ directory holds full PDFs of academic papers — not redistributable
 papers/
 # Per-page raw text files contain essentially the full paper text — copyright-sensitive
-reconstruction/*/*_raw.txt
+# Use **/ prefix so the pattern matches at any depth (e.g., runs/<slug>/reconstruction/<paper>/...)
+**/reconstruction/*/*_raw.txt
 
 # Credentials and secrets
 .env

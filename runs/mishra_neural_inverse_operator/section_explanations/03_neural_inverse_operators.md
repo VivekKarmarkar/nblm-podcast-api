@@ -1,0 +1,25 @@
+# Section 3 — designing the Neural Inverse Operator
+
+This is the heart of the paper. The previous section pinned down the mathematical shape of the problem: you have a boundary operator, and you want to recover an interior function. This section says: here's the neural network architecture that does it, and here's the math reasoning that explains why you'd design it this way.
+
+The authors start by enumerating the three things that make the learning task hard.
+
+First, there's a mismatch in where things live. The input lives on the boundary of the region. The output lives in the interior. So the architecture has to be able to take boundary data and produce interior predictions — different domains.
+
+Second, and this is the central twist of the paper, the input to the inverse map isn't a single function. It's a whole operator — an entire input-output rule on the boundary. So the architecture has to consume operators and produce functions. Most existing deep-learning operator-learning frameworks consume functions and produce functions. There's a real architectural gap.
+
+Third, these inverse problems are often only weakly stable. Tiny noise in the boundary measurements can produce big swings in the inferred interior. So the network has to be robust, and you may need extra regularization to keep things from blowing up.
+
+Then the authors lay out the two existing operator-learning building blocks they'll combine — DeepONets and Fourier Neural Operators. A DeepONet works like this: a "branch net" reads the input function evaluated at a bunch of sensor locations and turns it into coefficients; a "trunk net" reads the output location and turns it into basis functions; the final prediction is the dot product of the two. You can think of it as a learned basis decomposition. The DeepONet is good at flexibly mapping between different domains — it can take inputs from one place and produce outputs at another. That handles point one above. But it's linear in the trunk basis functions, which means it can't handle nonlinear mixing of modes.
+
+The Fourier Neural Operator is the opposite. It applies a series of nonlinear transformations, each of which lifts the data into Fourier space, multiplies by a learned spectral filter, transforms back, and adds a nonlinearity. It's very good at the heavy nonlinear processing — but it expects the input and output to live on the same grid in the same domain. Not great for our boundary-to-interior problem on its own.
+
+So the architectural insight is: stack them. Use a DeepONet first, to bridge the boundary-input to interior-output domain mismatch and produce intermediate interior representations. Then pass those representations through the FNO layers, where the nonlinear mode mixing and final inversion happen.
+
+But before you accept that on faith, the authors give you something rare and pleasing in deep learning papers — a derivation. They take one of the four problems (inverse wave scattering for the Helmholtz equation) and work out, by hand, the mathematical structure of the inverse map. They show that approximately inverting the map decomposes into four building blocks: a basis construction (which looks just like a DeepONet trunk net), a PDE solve (which looks just like a DeepONet branch net), a nonlinear mode mixing step (which can't be done by a DeepONet's linear combination — needs an FNO-type nonlinearity), and a final matrix inversion (which an FNO can also do). They show that if you arrange a network to mirror these four blocks, you get the DeepONet-then-FNO stack. The architecture isn't pulled from thin air; it's matched to the underlying math.
+
+The third design point they address is more subtle. The boundary operator is, in principle, infinite-dimensional — you can probe it with any boundary input and get an output. In practice, you have to discretize it: you probe with some finite number of boundary inputs, say L of them, and you get L corresponding output samples. The network needs to be able to handle this in a sensible way. It shouldn't care which order the samples come in (they're independent samples of the same operator). It should be able to handle different numbers of samples at training time and test time. And its performance shouldn't degrade much when the sample count changes.
+
+The authors handle this with two architectural choices: feeding only the outputs into the operator-side input (not the input-output pairs), and a clever training trick called randomized batching. During training, every iteration, the model gets a random number of samples drawn from the available pool. This forces the network to learn a representation that doesn't depend on having exactly some specific count of samples. It generalizes to whatever count you give it at test time.
+
+Put it all together — the DeepONet-then-FNO stack, the careful input scheme, the randomized batching — and you have what the authors call a Neural Inverse Operator, or NIO. The architecture is, to my reading, the actual main contribution of the paper. The next section is where they go test it.

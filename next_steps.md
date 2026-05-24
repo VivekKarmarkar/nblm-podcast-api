@@ -1,7 +1,23 @@
 # Next Steps — Multi-Paper Parallel Pipeline Fire
 
 **Captured:** 2026-05-24
-**Status:** Planned. Will fire after Vivek has had a chance to listen to v4 of the Bouman VVT podcast and validate the current pipeline quality.
+**Status:** ✅ **DONE 2026-05-24.** All four steps fully executed. The multi-paper parallel pattern is now proven and Vivek called the result "simply amazing work." The architecture has graduated from "plan" to "validated baseline." See `roadmap.md` for what's next.
+
+## Execution outcome (2026-05-24)
+
+- **Step 1 (sequential downloads):** ✅ DONE. 5 of 6 papers downloaded (Mishra, Tao, Nakamura-Uhlmann, Karniadakis, LeCun). Entry #4 "AI and creativity papers" deliberately skipped — it's a category not a specific paper.
+- **Step 2 (directory tree setup):** ✅ DONE. Each `runs/<slug>/` subdirectory populated with `papers/`, `section_explanations/`, `reconstruction/<paper-stem>/` per spec.
+- **Step 3 (parallel pipeline fire):** ✅ DONE. 5 agents in genuine parallel via single-message Agent dispatch. Orchestrator stayed free the whole ~17 minutes; Vivek tested "you legit free?" multiple times and the orchestrator answered instantly each time.
+- **Step 4 (results aggregation):** Implicit — 113 journal entries across all 5 papers, 4 corrections applied, 0 outright hallucinations. Cross-paper duration consistent at 16–17:12 min per podcast.
+- **Information-expert principle (the A/B test added at fire time):** ✅ validated. 3 share-variant agents called gws drive create + permissions create themselves; 2 local-variant agents left mp3s on disk for Vivek to triage.
+
+Drive links for the 3 share-variant podcasts: see `papers_to_sample_and_dogfood.md` Results section.
+
+Local-variant mp3s sit at `runs/nakamura_ulm_inverse_elasticity/podcast.mp3` and `runs/karniadakis_pinn/podcast.mp3`.
+
+---
+
+## Original plan (preserved for reference)
 
 ## Goal
 

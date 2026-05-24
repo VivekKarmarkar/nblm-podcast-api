@@ -60,21 +60,33 @@ affection.md                            A separate, less serious tradition
 
 The actual paper PDFs, the per-page raw text files, and the generated MP3s are deliberately **not** tracked in git (see `.gitignore`) — papers are copyright-sensitive, MP3s are large binary artifacts, and the per-page raw text is essentially the full paper text in plain form.
 
-## The worked example
+## The worked examples
 
-The repo contains a complete pipeline run against **Berthy T. Feng, Alexander C. Ogren, Chiara Daraio, Katherine L. Bouman, "Visual Vibration Tomography: Estimating Interior Material Properties from Monocular Video"** (CVPR 2022, DOI [10.1109/cvpr52688.2022.01575](https://doi.org/10.1109/cvpr52688.2022.01575)).
+The repo contains complete pipeline runs against **six** papers, exercising every part of the architecture.
 
-Walk the artifacts in this order to retrace the run:
+**Reference run (root-level artifacts):** Berthy T. Feng, Alexander C. Ogren, Chiara Daraio, Katherine L. Bouman, *"Visual Vibration Tomography: Estimating Interior Material Properties from Monocular Video"* (CVPR 2022, DOI [10.1109/cvpr52688.2022.01575](https://doi.org/10.1109/cvpr52688.2022.01575)). This is the canonical run, iterated through v1 → v4.
 
-1. `problem_statement_podcast_from_scratch.md` — the spec the run was fired against
-2. `section_explanations/00_abstract.md` through `08_conclusion.md` — what Phase 1 produced
+**Multi-paper parallel run (per-paper subdirectories under `runs/`):** Five more papers, spanning pure math, applied physics, ML, and AI philosophy, run as 5 background agents in genuine parallel via a single-message dispatch:
+
+| Run dir | Paper |
+|---|---|
+| `runs/mishra_neural_inverse_operator/` | Molinaro/Yang/Engquist/Mishra — Neural Inverse Operators for Solving PDE Inverse Problems (arXiv 2301.11167) |
+| `runs/nakamura_ulm_inverse_elasticity/` | Nakamura-Uhlmann — Global uniqueness for an inverse boundary problem arising in elasticity (1994 Inventiones) |
+| `runs/tao_ai_in_this_age/` | Terence Tao — Mathematical methods and human thought in the age of AI (arXiv 2603.26524) |
+| `runs/karniadakis_pinn/` | Raissi/Perdikaris/Karniadakis — Physics Informed Deep Learning Part I (arXiv 1711.10561) |
+| `runs/lecun_2022_path_autonomous_machine_intelligence/` | Yann LeCun — A Path Towards Autonomous Machine Intelligence (OpenReview, June 2022) |
+
+For any of the runs, walk the artifacts in this order to retrace:
+
+1. `problem_statement_podcast_from_scratch.md` (root) — the spec the run was fired against
+2. `section_explanations/` — what Phase 1 produced
 3. `draft_story.md` — Phase 2 synthesis
 4. `narrative_refined.md` — Phase 3 refinement
-5. `reconstruction/10.1109_cvpr52688.2022.01575/find-evidence-in-paper_10.1109_cvpr52688.2022.01575.md` — **the load-bearing audit trail** — 17 journal entries
+5. `reconstruction/<paper-stem>/find-evidence-in-paper_<paper-stem>.md` — **the load-bearing audit trail**, an indexed YAML journal
 6. `hallucination_audit.md` — how the audit consumed the journal to produce corrections
-7. `narrative_final.md` — the narrative actually narrated in the v4 podcast (13,457 chars, ~14:35 audio at TTS speed 0.85)
+7. `narrative_final.md` — the narrative actually narrated in the podcast
 
-The MP3 itself is not in this repo (binary, large, easier to regenerate than to version).
+MP3s are not tracked in git (binary, large, easier to regenerate than to version). The Drive links for the share-variant podcasts are in `papers_to_sample_and_dogfood.md`.
 
 ## Hallucination prevention, concretely
 
@@ -91,15 +103,18 @@ Each entry contains the claim, the verbatim excerpt, the page number, the sectio
 
 If the claim is `contradicted` or `silent` (paper does not address it), the narrative is corrected using the verbatim excerpt as the ground truth. The audit document (`hallucination_audit.md`) records every correction made, so the final narrative's relationship to the paper is traceable end-to-end.
 
-For the Bouman VVT run, 17 journal entries were created (visible in `reconstruction/.../find-evidence-in-paper_*.md`). 16 returned `supports`; 1 returned `partially_supports` (a slight overgeneralization, softened in `narrative_final.md`). Zero `contradicted` claims survived to the final.
+Across all 6 runs: **113 journal entries**, **4 corrections** applied, **0 outright hallucinations**. ~3.5% correction rate. For the reference Bouman VVT run alone: 17 entries, 16 supports + 1 partially_supports (the overgeneralization documented in `hallucination_audit.md`).
 
 ## Status
 
-Working, with one paper successfully run end-to-end through v4 of the pipeline. The narrative quality has been iterated four times (v1 too dense → v2 still too academic → v3 "huge improvement" → v4 surgical jargon fix + slower pacing). The architecture, including the autonomous-background-agent pattern, has been validated end-to-end.
+**Working, validated across 6 papers end-to-end.** The reference Bouman VVT run was iterated v1 → v4 to tune the delight brief; the subsequent multi-paper parallel run shipped 5 more papers (Mishra, Tao, Nakamura-Uhlmann, Karniadakis, LeCun) using the v4-tuned brief in a single ~17 minute wall-clock parallel dispatch. The autonomous-background-agent architecture and the information-expert principle for upload-and-share were both validated.
 
-Next steps (see the two `..._learning.md` and `..._dogfood.md` files for details):
-- **Diverse paper dogfooding** — run the pipeline on a span of papers (Mishra group's Neural Inverse Operator, Tao on AI, Karniadakis SPINN, LeCun world models, etc.) to build a corpus of per-paper artifacts the eventual `/podcastify` skill spec can draw on
-- **Empirical style learning** (deferred) — transcribe existing NotebookLM-generated podcasts, pair them with their source papers, extract empirical patterns to replace the current a-priori delight brief
+Audio quality at voice `nova` + `audify --speed 0.85` lands consistently at 16–17 min per podcast. Content + pacing now match or beat NotebookLM in places — see e.g. the Mishra/N-to-D operator explanation that grounded the abstract operator-in / operator-out architecture as the physical "apply forces and watch displacements on the boundary" mapping.
+
+Next steps (see `roadmap.md` for the live plan):
+- **Package the proven pipeline as 3 globally-available Claude Code skills:** `/podcastify`, `/podcastify-and-share`, `/download-podcastify-and-share` (this is the active phase as of 2026-05-24)
+- **Close the voice-quality gap** by switching `audify` to an ElevenLabs backend for emotional regulation (OpenAI TTS is competent but uncanny-valley-flat)
+- *No longer high-priority:* the originally-planned empirical-style-extraction project in `notebooklm_audio_data_driven_learning.md` — current quality already matches/beats NotebookLM in places, so transcribing NotebookLM episodes to learn its style isn't the right next investment
 
 ## Reproducing the pipeline
 

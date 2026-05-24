@@ -1,0 +1,58 @@
+{
+  "paper": "arxiv_2301.11167",
+  "title": "Neural Inverse Operators for Solving PDE Inverse Problems",
+  "authors": ["Roberto Molinaro", "Yunan Yang", "Bjorn Engquist", "Siddhartha Mishra"],
+  "total_pages": 35,
+  "main_body_pages": "1-9",
+  "sections": [
+    {
+      "index": 0,
+      "slug": "abstract",
+      "title": "Abstract",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "index": 1,
+      "slug": "introduction",
+      "title": "1. Introduction",
+      "page_start": 1,
+      "page_end": 2
+    },
+    {
+      "index": 2,
+      "slug": "class_of_inverse_problems",
+      "title": "2. A Class of Inverse Problems (incl. 2.1-2.4: Math framework, Calderon/EIT, Inverse Wave Scattering, Radiative Transport)",
+      "page_start": 2,
+      "page_end": 4
+    },
+    {
+      "index": 3,
+      "slug": "neural_inverse_operators",
+      "title": "3. Neural Inverse Operators (incl. 3.1 Learning task, 3.2 Architecture, 3.3 Motivating calculation)",
+      "page_start": 4,
+      "page_end": 6
+    },
+    {
+      "index": 4,
+      "slug": "empirical_results",
+      "title": "4. Empirical Results (incl. 4.1 EIT, 4.2 Wave scattering, 4.3 Optical imaging, 4.4 Seismic, 4.5 Robustness)",
+      "page_start": 7,
+      "page_end": 9
+    },
+    {
+      "index": 5,
+      "slug": "related_work",
+      "title": "5. Related Work",
+      "page_start": 9,
+      "page_end": 9
+    },
+    {
+      "index": 6,
+      "slug": "discussion",
+      "title": "6. Discussion / Conclusion",
+      "page_start": 9,
+      "page_end": 9
+    }
+  ]
+}

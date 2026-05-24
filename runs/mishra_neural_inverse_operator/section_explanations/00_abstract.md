@@ -1,0 +1,9 @@
+# Abstract — the one-sentence pitch
+
+A lot of important problems in science work like this: you can't reach inside the thing you care about, so you poke it from the outside and watch what comes back. You wiggle the voltage at the skin of a body and measure the current; you'd love to know what tissue is inside. You bounce a sound wave into the ground and listen for the echo; you'd love to know what rock layer is down there. You shoot light into a cloudy material and measure what leaks out the other side; you'd love to know how much that material absorbs.
+
+These are called inverse problems for partial differential equations, and they have a strange mathematical feature most people never notice. The thing you measure isn't a number, and it isn't a single picture. It's a whole rule — a thing that says "for any input I send in, here's the output that comes back." Mathematicians call that an operator. So to figure out the inside, you have to take an entire input-output rule and turn it back into a picture of what's inside.
+
+There's been an explosion of deep-learning models that can learn to map a function to another function — think image-to-image translation. But those models can't quite do what we need here, because the input isn't a function. It's an entire operator.
+
+The authors propose a new neural network architecture, which they call a Neural Inverse Operator (NIO), that's purpose-built for this kind of problem. It works by stacking two well-known building blocks — DeepONets and Fourier Neural Operators — in a specific order suggested by the math itself. They test it on four very different inverse problems from medicine, optics, and geophysics. NIO beats the baselines, holds up well under noise, and is several orders of magnitude faster than the traditional optimization-based approach.

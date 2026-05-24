@@ -1,0 +1,42 @@
+{
+  "paper": "Global uniqueness for an inverse boundary problem arising in elasticity",
+  "authors": ["Gen Nakamura", "Gunther Uhlmann"],
+  "year": 1994,
+  "venue": "Inventiones Mathematicae 118, 457-474",
+  "pages_total": 18,
+  "structure_note": "Standard math paper structure: Summary, Introduction with statement of results (section 0), one technical section establishing the diagonalization machinery (section 1), one technical section proving the main theorem (section 2), References.",
+  "sections": [
+    {
+      "id": 0,
+      "slug": "introduction_and_statement_of_results",
+      "title": "0. Introduction and statement of the results",
+      "pages": "1-5",
+      "line_range_in_pdftotext": [9, 201],
+      "role": "Sets up the elastic medium, defines the Dirichlet-to-Neumann (DN) map for the elasticity system, states the main theorem (global uniqueness of Lame parameters from the DN map in n>=3), and sketches the strategy: diagonalize the elasticity operator, build exponentially growing solutions, reduce to hyperbolic Cauchy problems, conclude lambda1=lambda2 and mu1=mu2."
+    },
+    {
+      "id": 1,
+      "slug": "complete_diagonalization",
+      "title": "1. Complete diagonalization",
+      "pages": "5-13",
+      "line_range_in_pdftotext": [202, 644],
+      "role": "The technical heart. Reduces the elasticity operator (a second-order system) to a pseudodifferential system whose principal part is diagonal, then to a first-order system that can be FULLY diagonalized modulo smoothing. This is the new machinery the paper introduces. Constructs the exponentially growing solutions (Calderon-style, but for elasticity, not conductivity) that the next section feeds into."
+    },
+    {
+      "id": 2,
+      "slug": "proof_of_theorem_0_7",
+      "title": "2. Proof of Theorem 0.7",
+      "pages": "13-17",
+      "line_range_in_pdftotext": [645, 873],
+      "role": "Closes the proof. Substitutes the special exponential solutions into the integral identity (Proposition 0.9), takes limits as the complex frequency goes to infinity, and reduces the problem to a pair of strictly hyperbolic PDEs in (lambda1-lambda2) and (mu1-mu2). Uses uniqueness of the Cauchy problem for hyperbolic operators (starting from the boundary, where the parameters already agree thanks to Theorem 0.8) to propagate the equality throughout the domain. Conclusion: lambda1=lambda2 and mu1=mu2 in all of Omega."
+    },
+    {
+      "id": 3,
+      "slug": "references",
+      "title": "References",
+      "pages": "17-18",
+      "line_range_in_pdftotext": [874, 899],
+      "role": "Bibliography. Not narrative-bearing."
+    }
+  ]
+}
