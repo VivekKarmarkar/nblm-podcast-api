@@ -1,0 +1,22 @@
+{
+  "paper": "arxiv_2507.09207",
+  "title": "Visual Surface Wave Elastography: Revealing Subsurface Physical Properties via Visible Surface Waves",
+  "authors": ["Alexander C. Ogren", "Berthy T. Feng", "Jihoon Ahn", "Katherine L. Bouman", "Chiara Daraio"],
+  "affiliation": "California Institute of Technology",
+  "venue": "ICCV 2025 (arXiv:2507.09207)",
+  "sections": [
+    {"id": "01", "title": "Abstract", "slug": "abstract", "page": 1},
+    {"id": "02", "title": "Introduction", "slug": "introduction", "page": 1},
+    {"id": "03", "title": "Related work (Video-based + Wave-based characterization)", "slug": "related_work", "page": 2},
+    {"id": "04", "title": "Background — Dispersion relations + Assumptions for tissue characterization", "slug": "background_dispersion", "page": 2},
+    {"id": "05", "title": "Methods — Extracting a dispersion relation from video", "slug": "methods_extract", "page": 3},
+    {"id": "06", "title": "Methods — Estimating thickness and stiffness via optimization", "slug": "methods_optimize", "page": 4},
+    {"id": "07", "title": "Results — Simulated plane strain (sensitivity to 5% changes)", "slug": "results_simulated_plane", "page": 4},
+    {"id": "08", "title": "Results — Real gelatin-based phantoms", "slug": "results_real_gelatin", "page": 5},
+    {"id": "09", "title": "Results — 3D human leg with spatially-varying thickness", "slug": "results_human_leg", "page": 6},
+    {"id": "10", "title": "Results — Objective function ablation (SSIM wins)", "slug": "results_objective_ablation", "page": 6},
+    {"id": "11", "title": "Discussion — Practical considerations", "slug": "discussion_practical", "page": 6},
+    {"id": "12", "title": "Discussion — Characteristic numbers (dimensionless groups)", "slug": "discussion_characteristic_numbers", "page": 7},
+    {"id": "13", "title": "Conclusion", "slug": "conclusion", "page": 8}
+  ]
+}

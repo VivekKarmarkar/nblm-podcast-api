@@ -1,0 +1,16 @@
+{
+  "paper": "Fourier Neural Operator for Parametric Partial Differential Equations",
+  "authors": "Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya, Andrew Stuart, Anima Anandkumar",
+  "venue": "ICLR 2021",
+  "pdf": "papers/arxiv_2010.08895.pdf",
+  "total_pages": 16,
+  "sections": [
+    {"id": "00", "slug": "abstract", "title": "Abstract", "page_start": 1, "page_end": 1},
+    {"id": "01", "slug": "introduction", "title": "1 Introduction", "page_start": 1, "page_end": 3},
+    {"id": "02", "slug": "learning-operators", "title": "2 Learning Operators", "page_start": 3, "page_end": 4},
+    {"id": "03", "slug": "neural-operator", "title": "3 Neural Operator", "page_start": 4, "page_end": 5},
+    {"id": "04", "slug": "fourier-neural-operator", "title": "4 Fourier Neural Operator", "page_start": 5, "page_end": 6},
+    {"id": "05", "slug": "numerical-experiments", "title": "5 Numerical Experiments", "page_start": 6, "page_end": 9},
+    {"id": "06", "slug": "discussion-and-conclusion", "title": "6 Discussion and Conclusion", "page_start": 9, "page_end": 10}
+  ]
+}

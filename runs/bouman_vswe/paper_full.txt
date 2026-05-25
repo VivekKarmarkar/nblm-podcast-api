@@ -1,0 +1,820 @@
+                                                                  Visual Surface Wave Elastography:
+                                                   Revealing Subsurface Physical Properties via Visible Surface Waves
+
+                                             Alexander C. Ogren∗            Berthy T. Feng∗ Jihoon Ahn Katherine L. Bouman                               Chiara Daraio
+                                                                                  California Institute of Technology
+
+
+                                                                  Abstract                                                                          estimated with VSWE
+arXiv:2507.09207v1 [cs.CV] 12 Jul 2025
+
+
+
+
+                                                                                                                                                    true
+                                            Wave propagation on the surface of a material contains                                                                       25
+                                         information about physical properties beneath its surface.
+                                         We propose a method for inferring the thickness and stiff-
+                                                                                                                                                                         20
+
+
+
+
+                                                                                                                                                                             tissue thickness [mm]
+                                         ness of a structure from just a video of waves on its sur-
+                                                                                                                              excitation
+                                         face. Our method works by extracting a dispersion rela-
+                                         tion from the video and then solving a physics-based opti-                           +                                          15
+                                         mization problem to find the best-fitting thickness and stiff-
+                                                                                                           surface              normal
+                                         ness parameters. We validate our method on both simu-              waves               displacement
+                                                                                                                                                                         10
+                                         lated and real data, in both cases showing strong agree-                             −
+                                         ment with ground-truth measurements. Our technique pro-
+                                         vides a proof-of-concept for at-home health monitoring of                                                                       5
+                                         medically-informative tissue properties, and it is further ap-
+                                         plicable to fields such as human-computer interaction.                                                     10      15      20
+                                                                                                                                                  tissue stiffness [kPa]
+
+                                                                                                           Figure 1. Estimating subsurface tissue properties of a human leg
+                                         1. Introduction                                                   with VSWE. From a video of surface wave motion, VSWE esti-
+                                                                                                           mates the thickness and stiffness of the soft tissue layer. In this
+                                         How waves propagate on the surface of a medium reveals            example, we are able to recover the three different thicknesses of
+                                         information about its subsurface properties. For example,         the three regions highlighted on the leg. We also recover the stiff-
+                                         by watching how ocean waves evolve and break as they near         ness of the leg tissue, which does not change across the leg.
+                                         the shore, one can infer the rises and dips of the seafloor
+                                         below [46]. Waves can also be observed on the surfaces            ultrasound [40, 47] and sometimes magnetic resonance [32]
+                                         of biological systems. Imagine applying a massage gun             devices, along with medical experts to operate the equip-
+                                         to your calf. The ripples on your skin convey information         ment [6, 11]. We show that it is possible to obtain coarse
+                                         about the underlying layers of fat, muscle, and bone. In          estimates of thickness and stiffness given surface waves
+                                         fact there is a well-defined relationship linking the thickness   measured with just a video camera. Another application
+                                         and stiffness of each layer to the wave propagation behavior.     is human computer interaction (HCI), where visually infer-
+                                         We propose Visual Surface Wave Elastography (VSWE), a             ring subsurface changes in muscle stiffness may unlock new
+                                         physics-based method to estimate the thickness and stiff-         modes of gesture recognition. In biomechanics, many re-
+                                         ness of a medium from a video of waves on its surface.            gions of the body are often modeled as a series of layers of
+                                             We are primarily motivated by the task of biological          biological tissue, such as skin, muscle, or bone [4, 21]. Sim-
+                                         tissue characterization, which has broad applications in-         ilarly, in this work, we model the medium as a layer of soft
+                                         cluding at-home health monitoring. For example, tumors            tissue with unknown thickness and stiffness atop a layer of
+                                         [25, 29], musculoskeletal degeneration [30, 41, 42], and          bone. We leverage the mathematical relationship between
+                                         liver disease [22, 39] often lead to changes in tissue thick-     the geometric and mechanical properties of the soft layer
+                                         ness or stiffness. However, existing techniques for elastog-      and the wave propagation behavior of the medium.
+                                         raphy (i.e., measuring tissue stiffness) require specialized
+                                                                                                              The wave propagation behavior of a material is com-
+                                            *equal contribution                                            pactly described by a mathematical object known as a dis-
+persion relation. Under some common biomechanical as-                 propagation. For example, magnetic resonance imaging
+sumptions in our layer model (discussed further in Sec. 3.1),         [24] uses knowledge of how radio-frequency waves are ab-
+the thickness and stiffness of the soft layer fully determine         sorbed and re-emitted by different types of tissues in the
+the dispersion relation. The main idea of our method is to            body. Ultrasound techniques, which are pervasive in non-
+find the thickness and stiffness values that lead to a disper-        destructive testing [28], medical imaging [5], and wear-
+sion relation that matches the dispersion relation extracted          able technology [26], use high-frequency mechanical bulk
+from surface waves observed in the video.                             waves to characterize tissue and locate features. Among tis-
+   In this paper, we first discuss related work on video-             sue characterizaton techniques, transient elastography [47],
+based and wave-based material characterization and pro-               shear wave elastography [40], and magnetic resonance elas-
+vide background on wave mechanics. We then describe                   tography [32] leverage knowledge of bulk wave physics to
+our method, which consists of taking a video of surface               estimate the elasticity of tissues and organs. However, such
+waves, extracting the dispersion relation from the video, and         methods often require not only high-end, expensive equip-
+then solving an optimization problem to find the best-fitting         ment, but also trained medical specialists [6, 11], making
+thickness and stiffness parameters. We validate our method            regular screening infeasible. In contrast, our work lever-
+on real and simulated data, including real videos of gelatin-         ages surface waves, which are generally less expensive to
+based phantoms that mimic biological tissue and realistic             observe than their bulk counterparts.
+simulations of a human leg.                                              Although very different fields from our application of
+                                                                      interest, geophysics and seismic imaging provide insights
+2. Related work                                                       into the possibility of using surface waves to infer subsur-
+                                                                      face features [23, 31, 34, 35, 37]. Inspired by the success
+2.1. Video-based material characterization                            of surface-wave methods in seismology, we propose to har-
+Videos encode rich information about the environment and              ness surface waves observed in video to infer subsurface tis-
+physical objects. For example, previous work has leveraged            sue properties. Whereas previous work [8] suggested an ap-
+surface vibrations [13] or sound [12, 18] in video to recover         proach using sensors sparsely placed on the skin, we lever-
+unknown information. For material characterization tasks,             age dense visual data. Vision-based tissue characterization
+the way an object moves in a video provides useful infor-             would enable the next generation of health monitoring sys-
+mation about its physical properties. Videos have been used           tems that take advantage of the ubiquity of visual sensors.
+to estimate material parameters of specific object classes,
+such as fabrics [7, 10, 33], rods [14, 15], and trees [44],           3. Background
+whose dynamics are entirely visible. In contrast, Visual Vi-          3.1. Dispersion relations
+bration Tomography [17] infers subsurface material proper-
+ties. Specifically, it recovers the spatially-varying stiffness       Just as sound waves can be expressed as the combina-
+and density throughout a 3D object with known geometry                tion of simple harmonic modes, waves traveling through
+by analyzing its global vibrational modes.                            any medium can be expressed as the combination of wave
+    Surface waves have been under-utilized for video-based            modes of different spatial and temporal frequencies. A dis-
+material characterization, even though they can also be ob-           persion relation compactly describes wave propagation by
+served in video and contain useful information about under-           defining all the possible wave modes of a medium. Specif-
+lying physical properties. Our work shows how to leverage             ically, it defines the wavevector and frequency of each pos-
+surface waves in video to estimate geometric and mechani-             sible wave mode, where the wavevector and frequency in-
+cal properties. A surface-wave-based approach is beneficial           dicate the spatial and temporal rates of oscillation, respec-
+when one wishes to analyze local structure without having             tively.
+to model the global structure, which may be complicated. In              Mathematically, the dispersion relation can be deter-
+the case of biological tissue characterization, for example,          mined by solving the harmonic elastic wave equation (a
+it would be impractical to model the 3D vibrational modes             PDE) subject to phase-shifted periodic boundary condi-
+of the entire human anatomy in order to estimate local tis-           tions. Let x = [x, y, z]⊺ denote the spatial location and
+sue properties. Our surface-wave-based approach circum-               u(x) = [u(x), v(x), w(x)]⊺ denote the displacement at x.
+vents the need to model a complex geometry and solve for              Assuming an isotropic linear-elastic material, the harmonic
+its global modes by targeting local regions where we can              elastic wave equation can be written as
+analyze wave modes of a simpler geometry.
+                                                                               −ω 2 M(u)(x) = K(u)(x)           ∀x ∈ Ω,        (1)
+2.2. Wave-based material characterization
+                                                                      where M and K denote linear operators representing the
+In general, wave-based imaging relies on an understand-               mass and stiffness of the medium. The mass operator M
+ing of how physical characteristics of interest affect wave           depends on the density field ρ(x). The stiffness operator
+
+
+                                                                  2
+K depends on the elastic modulus E(x) and Poisson’s ratio
+ν(x). The eigenvector solution u(x) describes the shape
+of the wave mode, and the eigenfrequency ω defines the
+temporal frequency of the wave. Note that the solutions also
+depend on the domain Ω, which in our case is parameterized
+by the thickness and length of the tissue layer.
+   When solving Eq. (1), boundary conditions are necessary
+to impose real-life assumptions of the physical system. In
+our setting, we assume that Ω is a finite subregion of the
+full wave medium (e.g., a section of a leg). Furthermore,
+to simplify our analysis, we target waves traveling in one
+direction (i.e., along the x direction). This leads us to apply       Figure 2. The dispersion relation depends on both the thickness
+                                                                      and the stiffness of the soft tissue. We show how the dispersion
+1D periodic boundary conditions on the domain x ∈ [0, a]
+                                                                      relation changes when the soft tissue is made slightly thicker or
+to impose the assumption that the wave medium continues               slightly stiffer, with examples of the wave modes that are embed-
+past the boundary of Ω.                                               ded in each dispersion relation. Wave mode dynamics occurring
+   Specifically, we apply the Bloch-Floquet [9, 20] (a.k.a.           beneath the surface affect their expression on the surface.
+phase-shifted) periodic boundary conditions, which define
+a boundary condition for every wavenumber γ ∈ [0, π/a].
+We note that in general γ is a wavevector, but in the case            where N is the number of branches, or the number of eigen-
+of 1D wave analysis, it is a wavenumber that indicates the            value solutions computed for Eq. (1).
+number of wavelengths per unit length. For a given γ, the                 The dispersion relation is only concerned with the spa-
+boundary condition is defined as                                      tial (γ) and temporal (ω) frequencies of the mode shapes
+           u(x = a, y, z) = u(x = 0, y, z)eiγa .           (2)        rather than the mode shapes u(x) themselves. From waves
+                                                                      that express themselves, even in part, on the surface, we
+In words, the solution at one end (x = 0) only differs from           can extract spatial and temporal frequency information to
+the solution at the other end (x = a) by the phase shift γa.          obtain a dispersion relation. Fig. 2 shows how the disper-
+    To compute a dispersion relation, we solve Eq. (1) sub-           sion relation changes with the thickness and stiffness of the
+ject to Eq. (2) for γ ∈ [0, π/a]. For each γ, we solve a gen-         soft tissue layer. Our method leverages the sensitivity of the
+eralized eigenvalue problem and obtain multiple (ω, u(x))             dispersion relation to small changes in these parameters.
+solution pairs. The dispersion relation is exactly the set of
+all ω solutions for every γ.                                          4. Methods
+3.2. Assumptions for tissue characterization                          This section describes the computational method of VSWE.
+For biological tissue characterization, we can model the              The input is a video of motion on the surface of the medium
+medium as a layer of soft tissue atop a hard bone layer,              of interest, and the output is the estimated thickness and
+where the top layer has uniform thickness T . We note that            stiffness of the medium. In between there are two broad
+throughout this work, we refer to the elastic modulus of the          stages: (1) extracting a dispersion relation from the video
+tissue as its stiffness. We make several assumptions to re-           and (2) solving for the tissue properties that best agree
+duce the complexity of the problem:                                   with the observed dispersion relation. Fig. 3 presents an
+1. The soft layer has a uniform stiffness E(x) = E.                   overview of the pipeline. Check out the supplemental ma-
+2. The density and Poisson’s ratio of the soft tissue are             terial for an interactive demo of how the method works.
+    known. We set ρ = 1g cm−3 [36] and ν = 0.45 [27].
+3. The bone is much stiffer than the soft tissue. This means          4.1. Extracting a dispersion relation from video
+    neither the thickness nor the exact stiffness of the bone         4.1.1. Motion extraction
+    layer matters, and we can model it as motionless.
+                                                                      The first step is to quantify the image-space displacements
+These assumptions are common in biomechanical analysis
+                                                                      in the video. Since surface wave motion tends to be small,
+[4, 21]. Under these assumptions, the stiffness operator K
+                                                                      we use phase-based motion processing [43], which is sen-
+in Eq. (1) only depends on the elastic modulus E (a.k.a.
+                                                                      sitive to sub-pixel displacements. Specifically, we compute
+stiffness) of the soft tissue, and the spatial domain Ω on
+                                                                      local phase shifts in a complex steerable pyramid [38] and
+which we solve Eq. (1) only depends on the thickness T .
+                                                                      then convert these to pixel displacements [19]. The result is
+This mean we can fully determine the dispersion relation
+                                                                      the image-space horizontal displacement ũ(x̃, ỹ, t) and ver-
+based on T and E, so we denote the dispersion relation as
+                                                                      tical displacement ṽ(x̃, ỹ, t) at each pixel (x̃, ỹ) and video
+         D(T, E) = {ωi (γ)}N
+                           i=1       ∀γ ∈ [0, π/a],        (3)        frame t, where the displacements are relative to the first
+
+
+                                                                  3
+Figure 3. Method overview. Given a video of the surface of the medium of interest, we first extract motion fields in image-space. From
+these we extract the observed dispersion relation, which dictates the spatial and temporal frequencies of waves that travel through the
+medium. We solve a physics-based optimization problem to estimate the thickness and stiffness values that lead to a theoretical dispersion
+relation that best agrees with the observed dispersion relation.
+
+
+frame. (Image-space coordinates are notated with a tilde                 We do this via physical simulation and optimization. For a
+to avoid confusion with world-space coordinates.)                        given hypothesized thickness T and stiffness E, we employ
+4.1.2. Estimating the dispersion relation                                the finite element method (FEM) to numerically compute
+                                                                         the dispersion relation. We wrote specialized FEM code to
+We process the image-space surface displacements into a                  do so efficiently and will release the code upon publication.
+dispersion relation via the fast Fourier transform (FFT). We             The goal is to maximize an objective function that rewards
+assume that the waves are traveling in the horizontal direc-             similarity between D(T, E) and Dobs .
+tion in image-space. For each row of pixels in the ũ(x̃, ỹ, t)            After testing various objective functions, we found that
+video, we take a 2D FFT, transforming the space dimen-                   treating dispersion relations as images and using the struc-
+sion x̃ to the wavenumber dimension γ and the time dimen-                tural similarity index measure (SSIM) [45] to work best.
+sion t to the frequency dimension ω. That is, for the row                That is, we aim to maximize the SSIM between the im-
+where ỹ = ỹi , we convert the ũ(x̃, ỹ = ỹi , t) signal to the       ages of the observed and proposed dispersion relations. The
+complex-valued signal u(i)(γ,
+                          b̃      ω), whose magnitude gives              observed dispersion relation Dobs , since it is derived via
+the dispersion relation. To improve the signal-to-noise ratio,           a 2D FFT, is already represented as an image. However,
+we average across all the rows and both displacement direc-              the physics-based dispersion relation D(T, E) is computed
+tions, resulting in the observed dispersion relation Dobs :              as a set of curves. We transform D(T, E) into an image
+                            H
+                       1 X  b̃                                         Dhyp (T, E) by assigning intensities with a Gaussian kernel
+            Dobs :=                 v(i) ,
+                             u(i) + b̃                        (4)        based on the distance from each (γ, ω) pixel to the curves.
+                      2H i=1
+                                                                         Then we solve the following optimization problem:
+where H is the number of rows in the image. Fig. 4 il-
+lustrates this process, showing how the 2D FFT pulls out                       T ∗ , E ∗ = arg max SSIM (Dhyp (T, E), Dobs ) .        (5)
+                                                                                             T,E
+spatial and temporal frequency content.
+    The main challenge is that the observed dispersion re-               We solve Eq. (5) with a grid search over possible thickness
+lation likely does not fully agree with the true theoretical             and stiffness values, although more efficient approaches can
+dispersion relation of the medium. First of all, it is incom-            be taken for computationally demanding settings.
+plete: wave modes that do not prominently express on the
+surface or require large amounts of energy to propagate may              5. Results
+not appear strongly in the video, and frequencies above the
+Nyquist sampling rate of the video cannot be captured. Sec-              We validate our approach on real and simulated data. We
+ond of all, the extracted motion may be noisy due to cam-                demonstrate remarkable accuracy on real gelatin samples,
+era noise or spurious motion (from, e.g., lights flickering or           and we demonstrate recovering spatially-varying thickness
+rigid-body motion). VSWE has some margin of error due                    and stiffness across a simulated 3D human leg.
+to the discrepancy between the observed and true dispersion
+                                                                         5.1. Simulated plane strain
+relations, although we show in our experiments in Sec. 5.1
+it is sensitive to 5% changes in the true parameters.                    We created a two-layer tissue model in COMSOL [1] that
+                                                                         would allow us to simulate samples with ground-truth geo-
+4.2. Estimating the thickness and stiffness                              metric and mechanical parameters. We set stiffness values
+The next stage is to find the geometric and mechanical pa-               on the order of 10 kPa, which is a reasonable range for soft
+rameters that best explain the observed dispersion relation.             tissue [16]. We simulated the model’s response to a chirp
+
+
+                                                                     4
+                       extracted vertical displacement                         frequency-separated wave modes                             dispersion relation stack        averaged dispersion relation
+
+
+
+
+                                                                                                                                                                    )
+                                                                                                                                                                  (ω
+                                                                                                                                                             cy
+                                                                                                                                                             en
+                                                                                                                                                           qu
+                                                                                                                                                        fre
+
+
+
+
+                                                                                                                                                                                   frequency (ω)
+                                                                                                 )
+                                                                                               (ω
+                                                            1D FFT                                                            1D FFT                                     average
+                         t)
+
+
+
+
+                                                                                          cy
+                          e(
+
+
+
+
+                                                                                          en
+                       tim
+
+
+
+
+                                                                                        qu
+                                                                                     fre
+                                                    +
+                                                            (time)                                                            (space)
+
+
+
+
+                                                                                                                                        image row (𝑦)
+       image row (𝑦)
+
+
+
+
+                                                                     image row (𝑦)
+
+
+
+
+                                                                                                                                                   #
+                  #
+
+
+
+
+                                                                                #
+                                                        0
+                                                    –
+                               image column (𝑥)
+                                             #                                                       image column (𝑥)
+                                                                                                                   #
+                                                                                                                                                                                                   wavenumber (γ)
+                                                                                                                                                        wavenumber (γ)
+
+
+
+Figure 4. Obtaining a dispersion relation from image-space motion. Here we demonstrate with the vertical displacements taken from a real
+video of a gelatin sample. Taking a 1D FFT across time for every pixel allows us to separate wave modes by frequency (ω). Taking another
+1D FFT across space (in the x̃ direction) decomposes the wave modes into spatial frequencies (γ). The result is a 2D FFT representing the
+dispersion relation. We average the dispersion relations across image rows and both displacement directions (ũ and ṽ).
+
+
+
+
+                                                                                                                                                                          shaker
+                                                                                                                                                                                                                    high-speed
+                                                                                                                                                                                                                      camera
+
+                                                                                                                                                                                              gelatin-based
+                                                                                                                                                                                              phantom
+
+
+
+                                                                                                                            Figure 6. Experiment setup. A shaker was applied on one side
+                                                                                                                            of the gelatin-based phantom to excite waves in the medium. A
+                                                                                                                            high-speed camera, zoomed in on the phantom’s surface, captured
+                                                                                                                            videos of the response to the shaker. As the left picture shows, we
+                                                                                                                            took temperature recordings with a thermometer.
+Figure 5. Sensitivity analysis. We applied VSWE to plane-strain
+simulations with a range of true thickness and stiffness values,
+along with slight perturbations of those values. In each cluster, we
+perturbed the true parameters by ±5% and ±10% from the central                                                              5.2. Real videos of gelatin-based phantoms
+values and found that VSWE was sensitive to these changes.                                                                  To test our method on real data, we created gelatin-based
+                                                                                                                            phantoms (i.e., samples mimicking biological tissue) of
+                                                                                                                            varying thicknesses. We poured varying amounts of gelatin
+excitation signal applied to the leftmost side of the surface                                                               (1000, 1100, and 1500 mL) into the same-sized container,
+of the sample. The simulations were done with the plane-                                                                    leading to three different thicknesses. We set the samples in
+strain assumption, which allows for modeling 3D dynamics                                                                    the refrigerator for about 24 hours. Once they were set, we
+with only two dimensions by assuming that strain is con-                                                                    sprinkled garlic powder onto the samples to create texture
+stant in the z direction. We used the simulated horizontal                                                                  for motion extraction.
+and vertical displacements to obtain dispersion relations.                                                                     For each set sample, we measured the thickness with
+    We tested the sensitivity of our method by applying                                                                     calipers, and we used rheometry to obtain ground-truth stiff-
+slight changes to the true thickness and stiffness of the sim-                                                              ness values. To obtain videos, we applied a shaker at one
+ulated sample. That is, for a certain thickness and stiffness,                                                              end of the sample to excite waves with a chirp signal and
+we can simulate samples assuming those parameters as well                                                                   recorded the surface of the sample with a high-speed cam-
+as perturbations of those parameters and assess whether                                                                     era at 600 FPS (each video was about four seconds long).
+VSWE picks up on these slight changes. As an experiment,                                                                    Fig. 6 shows pictures of the experiment setup.
+we simulated samples at 5 distinct thicknesses and 4 dis-                                                                      For each of the three samples, we took many rheometry
+tinct moduli. For each thickness-stiffness pair, we looked at                                                               measurements and videos over the course of about one hour
+5% and 10% perturbations of either parameter. This led                                                                      after removing the sample from the refrigerator. In total we
+to 9 clusters with 9 simulated samples each. As Fig. 5                                                                      obtained about 60 videos per sample over time, each with
+shows, within each cluster, the estimated parameters track                                                                  corresponding ground-truth parameters. Fig. 7 shows the
+with changes in the true parameters, even when the true pa-                                                                 inferred parameters for each sample and each point in time.
+rameters have changed by only 5%.                                                                                           Fig. 7(a) shows that our method clearly identifies the three
+
+
+                                                                                                                        5
+(a)                                          true
+                                                                         (b)             15.5
+                                                                                                                                               17                         displacements in two directions: one tangent to the leg’s
+                   15
+                                                                                                                                               16
+                  14.5
+                                                                                          15
+                                                                                                                                                                          surface and one normal to the leg’s surface.
+
+
+
+
+                                                                                                                                                   temperature [°C]
+                                                                                         14.5                                                  15
+                   14
+                                                                                                                                                                              We applied a sweeping window across the upper calf re-
+stiffness [kPa]
+
+
+
+
+                                                                       stiffness [kPa]
+                                                                                          14            true                                   14
+                  13.5
+                                                                                         13.5
+
+                   13                                                                     13
+                                                                                                                                               13                         gion, estimating the thickness and modulus at each window
+                                                                                                                                               12
+                  12.5                                                                   12.5
+
+                                                                                                                                               11
+                                                                                                                                                                          location. Fig. 8 shows how, as the window sweeps around
+                   12                                                                     12
+
+
+                  11.5
+                                                  VSWE                                   11.5                  VSWE                            10
+                                                                                                                                                                          the leg, the inferred thickness changes. We computed the
+                                                  calipers                                11                   rheometry
+                   11
+                                                                                         10.5
+                                                                                                                                               9                          true thickness by taking the distance from the point on the
+                  10.5                                                                                                                         8
+                         14   15   16   17   18       19     20   21                            4   6          8      10   12   14   16   18                              skin to the nearest point on the bone. This results in a
+                              thickness [mm]                                                               temperature [°C]
+                                                                                                                                                                          thickness distribution within the window, since the thick-
+Figure 7. (a) Estimated thickness and stiffness for three phan-                                                                                                           ness changes slightly in the lengthwise direction of the leg,
+toms over a range of temperatures. The phantoms were pro-                                                                                                                 as well. Fig. 8 shows the inferred thickness and the dis-
+duced with three different volumes (1000, 1100, 1500 mL) of                                                                                                               tribution of ground-truth thicknesses for each location of
+gelatin but set in the same-sized container, thus generating three                                                                                                        the sweeping window. We find that the estimated thickness
+different thicknesses. The thickness of each sample was measured                                                                                                          roughly agrees with the true thickness distribution. There
+with calipers. We produced a confidence interval of the ground-                                                                                                           appears to be slightly more error near the edges of the simu-
+truth thickness by taking the 0.2 and 0.8 quantiles of multiple                                                                                                           lated domain, which may be due to boundary effects. While
+calipers measurements. The VSWE-estimated thickness consis-                                                                                                               the physics-based simulation in COMSOL is well-modeled
+tently falls within the confidence interval. Note that while each                                                                                                         in the interior of the domain, there may be artifacts near
+phantom was polymerized according to the same approximate
+                                                                                                                                                                          the boundary of the domain, making it harder to infer the
+recipe, slight variations in the recipe, along with slightly differ-
+ent polymerization durations, led to some variation in the stiff-
+                                                                                                                                                                          correct tissue parameters near the boundary.
+ness across samples. The temperature changes occurred as the                                                                                                                  We also applied VSWE to three different windows in the
+samples spent more time at room temperature after being removed                                                                                                           lower calf region. Rather than perform a sweep in this re-
+from the fridge. (b) Estimated stiffness values for the thinnest                                                                                                          gion, we chose to focus on three distinct windows since
+sample over the same range of temperatures. The ground-truth                                                                                                              there are three subregions in the lower calf area that have
+elastic modulus was measured with rheometry over a similar tem-                                                                                                           notably different thicknesses, due to the tissue structure
+perature range. Because the modulus of hydrogels can depend on                                                                                                            changing a lot near the ankle. As Fig. 8 shows, the inferred
+both temperature and frequency [48], the rheometry measurements                                                                                                           thickness agrees with the true thickness distribution for each
+show a different stiffness range at each temperature. Note that the                                                                                                       subregion. Our method also recovered the constant stiffness
+rheometry measurements were only taken between 10–100 Hz due                                                                                                              throughout the calf, as shown in Fig. 1.
+to instrument limitations, while the excitation signal ranged from
+40–200 Hz. This may explain some of the discrepancy between                                                                                                               5.3.1. Objective function ablation
+VSWE and rheometry, especially for the colder (and thus stiffer)                                                                                                          As mentioned in Sec. 4.2, we find that SSIM performs
+samples which exhibit a stronger expression of higher-frequency                                                                                                           best for the optimization objective function. This choice
+wave dynamics. Regardless, in each case, VSWE estimates the
+                                                                                                                                                                          was crucial for obtaining acceptable results with the 3D
+stiffness extremely well, within 1.2% error of the rheometry range.
+                                                                                                                                                                          leg. Fig. 9 shows the optimization landscape for different
+                                                                                                                                                                          choices of the objective function, demonstrated on both the
+                                                                                                                                                                          upper calf simulation and a real video of gelatin. We com-
+different thicknesses of the samples. As a sample spends
+                                                                                                                                                                          pare SSIM to the following objective functions: a curve-
+more time out of the refrigerator, its temperature increases
+                                                                                                                                                                          based objective function, the negative mean squared error
+and its stiffness decreases. Fig. 7(b) shows that the esti-
+                                                                                                                                                                          (MSE) between the images, and the peak signal-to-noise
+mated stiffness decreases accordingly with temperature.
+                                                                                                                                                                          ratio (PSNR) between the images. The curve-based loss
+5.3. 3D human leg with spatially-varying thickness                                                                                                                        function goes through all the curves (i.e., {ωi (γ)}N
+                                                                                                                                                                                                                              i=1 ∀γ ∈
+                                                                                                                                                                          [0, π/a]) in D(T, E) and integrates the values of the ob-
+As another step towards realism, we tested VSWE on a sim-                                                                                                                 served dispersion relation Dobs along the curves. Fig. 9
+ulated female human leg. The anatomical geometry of the                                                                                                                   shows that SSIM leads to the sharpest loss landscape and
+leg was obtained as an STL file from the dataset of An-                                                                                                                   the most accurate estimated parameters.
+dreassen et al. [3], who created 3D models from the Na-
+tional Library of Medicine’s Visible Human Project [2]. We                                                                                                                6. Discussion
+simulated the leg’s response to a chirp excitation applied on
+the leg in COMSOL, running a full 3D physics simulation                                                                                                                   6.1. Practical considerations
+without any assumptions besides linear elasticity. For the                                                                                                                VSWE’s performance depends on many factors, including
+sake of computational feasibility, we ran the simulation on                                                                                                               the types of waves supported by the tissue, the quality of the
+the lower half of the leg, which we refer to as the calf region.                                                                                                          observation, and the quality of the physics model. One con-
+To obtain dispersion relations, we considered the simulated                                                                                                               sideration is the resolution of the FEM mesh used to model
+
+
+                                                                                                                                                                      6
+Figure 8. 3D anatomical inference. Panel (a) shows the realistic 3D leg anatomy (taken from the Visible Human Project [2]). We ran a full
+3D simulation of the leg’s response to a chirp excitation applied on the skin. The observed dispersion relation, along with the optimization
+landscape and hypothesized dispersion relation of the optimal parameters, is shown for two regions: one on the upper calf and one on the
+lower calf near the ankle. Panel (b) shows results of sweeping an observation window across a region of the upper calf. A ground-truth
+thickness distribution was obtained by computing the distance from the skin to the nearest point on the bone across the observation window.
+The VSWE-estimated thickness as the observation window slides from left to right tracks with the changing thickness of the leg. Panel (c)
+shows results for three distinct regions near the ankle. The VSWE estimations reflect the drastically different thicknesses of these regions.
+
+
+                                                                                                                         optimization landscapes
+                                                 obs. dispersion                               curve-based                        neg. mse                            psnr                           ssim
+                                                 200
+                                                                       high 25                                          25                             25                             25
+
+                                                                                          20                            20                             20                             20
+sim. leg
+
+
+
+
+                                                 150
+               upper calf
+
+
+
+
+                                                                                          15                            15                             15                             15
+                                                 100
+                                                                                          10                            10                             10                             10
+
+                                                  50
+                                                                                          5                             5                              5                              5
+                                                                       low
+                                                                                               10   20   30   40   50        10    20   30   40   50        10   20    30   40   50        10   20    30   40   50
+                                                   0
+                                                       0   50   100
+                                                 200
+                                                                                          25                            25                             25                             25
+real gelatin
+
+
+
+
+                                                                        stiffness [kPa]
+                               frequency [1/s]
+               1000 mL, 14°C
+
+
+
+
+                                                                                          20                            20                             20                             20
+                                                 150
+
+                                                                                          15                            15                             15                             15
+
+                                                 100
+                                                                                          10                            10                             10                             10
+
+                                                                                          5                             5                              5                              5
+                                                 50
+                                                                                               10   20   30   40   50        10    20   30   40   50        10   20    30   40   50        10   20    30   40   50
+
+                                                   0       50    100                           thickness [mm]
+                                            wavenumber [1/m]
+
+
+Figure 9. Ablation of optimization objective function. The opti-
+                                                                                                                                                                                                                         Figure 10. Ablation of FEM mesh resolution. As the mesh be-
+mization landscape is shown for various objective functions, ap-
+                                                                                                                                                                                                                         comes finer, the VSWE-estimated parameters approach the true
+plied in two different scenarios. Each landscape is visualized with
+                                                                                                                                                                                                                         parameters used for the COMSOL plane-strain simulation.
+its own color map limits, but bright yellow and dark blue indicate
+high (good) and low (bad) objective values, respectively. SSIM
+gives the sharpest optimization landscape. For the simulated up-
+per calf, all the objective functions besides SSIM lead to the wrong
+                                                                                                                                                                                                                         the number of wavelengths that can be observed. Fig. 11
+optimal parameters (cross hairs indicate target parameters). Addi-                                                                                                                                                       shows how, keeping all else fixed, the FFT degrades as
+tionally, note how the simulated upper calf leads to a blurrier dis-                                                                                                                                                     the observed domain shrinks, which makes inference more
+persion relation and hence blurrier optimization landscapes than                                                                                                                                                         challenging.
+the real gelatin sample, which has a simple geometry.
+                                                                                                                                                                                                                         6.2. Characteristic numbers
+                                                                                                                                                                                                                         In our ablation studies in Fig. 11 and Fig. 10, we kept all
+physics, as the element size determines the modeling accu-                                                                                                                                                               other parameters of the problem fixed. By changing other
+racy and the smallest modeled wavelength. Fig. 10 shows                                                                                                                                                                  parameters (e.g., increasing the image resolution, changing
+that as the element size decreases, the estimated parameters                                                                                                                                                             the range of frequencies in the excitation signal, or changing
+approach the true parameters.                                                                                                                                                                                            the tissue thickness), we can overcome certain limitations.
+   Another consideration is that the spatial length L of the                                                                                                                                                             This leads us to introduce characteristic numbers.
+observation window determines the largest wavelength and                                                                                                                                                                    We can characterize the physical system and inference
+
+
+                                                                                                                                                                                                                     7
+                                                                             π5 improves performance by ensuring that physics is well-
+                                                                             modeled in the parameter-fitting process.
+                                                                                 Other characteristic numbers reflect the actual physics
+                                                                             that are possible in the system. For example, π6 := γT
+                                                                             conveys the “shallowness” of the wave, measuring how sig-
+                                                                             nificantly the stiff foundation affects the dynamics of a sur-
+                                                                             face wave. It is beneficial for π6 to be neither too large nor
+                                                                             too small. If π6 is too large, then waves behave similarly
+Figure 11. Ablation of spatial extent of observation. Keeping all
+                                                                             to how they would in an infinitely-thick medium, making it
+else fixed, decreasing the spatial length L of the observation win-          difficult to pinpoint the thickness. If π6 is too small, waves
+dow degrades the quality of the observed dispersion relation. A              above a certain wavelength will not be permitted to exist,
+degraded dispersion relation in turn leads to a fuzzy optimization           making it necessary to capture smaller wavelengths.3
+landscape (see Fig. 9 for an example).                                          Understanding these characteristic numbers is important
+                                                                             for extending the use of VSWE to scenarios and applica-
+                                                                             tions with vastly different parameter ranges than those stud-
+                                                                             ied in this paper, whether the objects are much larger or
+                                                                             smaller, stiffer or softer, denser or lighter, or exhibit dynam-
+                                                                             ics at much higher or lower wavenumbers or frequencies.
+                                                                             In general, by preserving the values of these characteristic
+                                                                             numbers (e.g., by increasing FPS in coordination with ω),
+                                                                             we can preserve the performance of VSWE.
+                                                                                Fig. 12 provides an example of how to take advantage
+                                                                             of characteristic numbers. Specifically, we overcome the
+                                                                             challenge of a smaller observed domain (as illustrated in
+                                                                             Fig. 11) by rescaling other parameters to preserve the rel-
+                                                                             evant characteristic numbers and thus maintain the quality
+Figure 12. Leveraging similitude of characteristic numbers en-               of the observed dispersion relation. In general, one should
+ables the application of VSWE to extremely different parameter               look to characteristic numbers as guidelines for adjusting
+ranges. In this simulated example, we show that by preserving the            system and/or inference parameters in order to maintain the
+values of π1−6 , we see a similar observed signal from a system              performance of VSWE across a variety of scenarios.
+with parameters 10× different than the primary ranges studied in
+this paper. In particular, we rescaled the size of the observation
+window, the thickness of the tissue, the spatial sampling rate, the          7. Conclusion
+total observation time, the frequency range of the excitation, and
+the temporal sampling rate. Note that the observation window on              We have introduced Visual Surface Wave Elastography for
+the right is smaller than that of the most degraded FFT in Fig. 11,          estimating subsurface geometric and mechanical properties
+yet the FFT here has not degraded.                                           from visible surface waves. Our method works by extract-
+                                                                             ing spatial and temporal frequency information from sur-
+                                                                             face waves observed in video. By representing this infor-
+problem with characteristic numbers (a.k.a. dimensionless                    mation in the form of a dispersion relation, we can use a
+numbers or π−groups). Some characteristic numbers re-                        fully physics-based approach to solve for the properties that
+flect the observability of wave modes, such as π1 := γL,                     explain the wave behavior observed in the video. We vali-
+π2 := PPM/γ, π3 := ωτ , and π4 := FPS/ω, where PPM                           dated our method on both simulated and real data, showing
+(pixels per meter) is the spatial sampling rate, FPS (frames                 that our method is sensitive to small changes in the proper-
+per second) is the temporal sampling rate, and τ is the total                ties of tissue-like media. We demonstrated the promise of
+observation time. Increasing π1−4 improves VSWE’s per-                       applying VSWE in the real world by testing it on real videos
+formance by improving the quality of the FFT dispersion.2                    of gelatin-based phantoms and on a simulated realistic 3D
+   Other characteristic numbers reflect the numerical accu-                  human leg. Our work shows the potential of everyday visual
+racy of the FEM model used to fit the observation, such as                   data to reveal critical information deep beneath the skin.
+         1
+π5 := γe   , where e is the FEM element size. Increasing
+
+   2                                                                             3 A small π explains why ocean waves break near the shore. It is also
+p Remark: ω and γ are roughly coupled through the wavespeed c ∼                             6
+   E/ρ ∼ ω/γ of the tissue, meaning that π1−2 and π3−4 are related via       the reason that a higher-frequency excitation was helpful for the very thin
+the material properties.                                                     tissue near the ankle in Fig. 8.
+
+
+                                                                         8
+Acknowledgments                                                                microphone: Passive recovery of sound from video. ACM
+                                                                               Transactions on Graphics (Proc. SIGGRAPH), 33(4):79:1–
+ACO and CD are supported by DOE award no. DE-                                  79:10, 2014. 2
+SC0021253 and the New Frontiers of Sound (NewFoS)                         [14] Abe Davis, Katherine L Bouman, Justin G Chen, Michael
+NSF center. BTF and KLB acknowledge support from the                           Rubinstein, Fredo Durand, and William T Freeman. Vi-
+NSF GRFP, the Amazon AI4Science Partnership Discovery                          sual vibrometry: Estimating material properties from small
+Grant, and the Heritage Medical Research Institute (HMRI)                      motion in video. In Proceedings of the IEEE Conference
+Fellowship. JA and CD are supported by the HMRI and the                        on Computer Vision and Pattern Recognition, pages 5335–
+NSF Center to Stream Healthcare in Place (C2SHIP) award                        5343, Boston, MA, USA, 2015. IEEE. 2
+no. 2052827.                                                              [15] Abe Davis, Katherine L. Bouman, Justin G. Chen,
+                                                                               Michael Rubinstein, Oral Büyüköztürk, Frédo Durand, and
+                                                                               William T. Freeman. Visual vibrometry: Estimating material
+References                                                                     properties from small motions in video. IEEE Trans. Pattern
+ [1] COMSOL AB. Comsol multiphysics® v5.5, 2019. 4                             Anal. Mach. Intell., 39(4):732–745, 2017. 2
+ [2] M.J. Ackerman. The visible human project. Proceedings of             [16] V Egorov, S Tsyuryupa, S Kanilo, M Kogit, and AJME Sar-
+     the IEEE, 86(3):504–511, 1998. 6, 7                                       vazyan. Soft tissue elastometer. Medical engineering &
+ [3] Thor E Andreassen, Donald R Hume, Landon D Hamilton,                      physics, 30(2):206–212, 2008. 4
+     Karen E Walker, Sean E Higinbotham, and Kevin B Shel-                [17] Berthy T Feng, Alexander C Ogren, Chiara Daraio, and
+     burne. Three dimensional lower extremity musculoskeletal                  Katherine L Bouman. Visual vibration tomography: Esti-
+     geometry of the visible human female and male. Scientific                 mating interior material properties from monocular video.
+     Data, 10(1):34, 2023. 6                                                   In Proceedings of the IEEE/CVF Conference on Computer
+ [4] J. W. Andrews, M. J. Adams, and T. D. Montenegro-Johnson.                 Vision and Pattern Recognition, pages 16231–16240, 2022.
+     A universal scaling law of mammalian touch. Science Ad-                   2
+     vances, 6(41):eabb6912, 2020. 1, 3                                   [18] Chao Feng, Ziyang Chen, and Andrew Owens. Self-
+                                                                               supervised video forensics by audio-visual anomaly detec-
+ [5] Danilo Avola, Luigi Cinque, Alessio Fagioli, Gianluca
+                                                                               tion. Computer Vision and Pattern Recognition (CVPR),
+     Foresti, and Alessio Mecca. Ultrasound medical imaging
+                                                                               2023. 2
+     techniques: a survey. ACM Computing Surveys (CSUR), 54
+                                                                          [19] David J Fleet and Allan D Jepson. Computation of compo-
+     (3):1–38, 2021. 2
+                                                                               nent image velocity from local phase information. Interna-
+ [6] R. A. Bell. Economics of MRI technology. Journal of mag-
+                                                                               tional journal of computer vision, 5(1):77–104, 1990. 3
+     netic resonance imaging: JMRI, 6(1):10–25, 1996. 1, 2
+                                                                          [20] Gaston Floquet. Sur les équations différentielles linéaires à
+ [7] Kiran S. Bhat, Christopher D. Twigg, Jessica K. Hodgins,                  coefficients périodiques. In Annales scientifiques de l’École
+     Pradeep K. Khosla, Zoran Popović, and Steven M. Seitz. Es-               normale supérieure, pages 47–88, 1883. 3
+     timating cloth simulation parameters from video. In Pro-
+                                                                          [21] Freija Geldof, Behdad Dashtbozorg, Benno HW Hendriks,
+     ceedings of the 2003 ACM SIGGRAPH/Eurographics Sym-
+                                                                               Henricus JCM Sterenborg, and Theo JM Ruers. Layer thick-
+     posium on Computer Animation, page 37–51, Goslar, DEU,
+                                                                               ness prediction and tissue classification in two-layered tissue
+     2003. Eurographics Association. 2
+                                                                               structures using diffuse reflectance spectroscopy. Scientific
+ [8] Marcin Białas and Bojan B. Guzina. On the viscoelastic                    reports, 12(1):1698, 2022. 1, 3
+     characterization of thin tissues via surface-wave sensing. In-       [22] Penelope C. Georges, Jia-Ji Hui, Zoltan Gombos, Mar-
+     ternational Journal of Solids and Structures, 48(14):2209–                garet E. McCormick, Andrew Y. Wang, Masayuki Uemura,
+     2217, 2011. 2                                                             Rosemarie Mick, Paul A. Janmey, Emma E. Furth, and Re-
+ [9] Felix Bloch. Über die quantenmechanik der elektronen in                  becca G. Wells. Increased stiffness of the rat liver pre-
+     kristallgittern. Zeitschrift für physik, 52(7):555–600, 1929.            cedes matrix deposition: Implications for fibrosis. Ameri-
+     3                                                                         can Journal of Physiology-Gastrointestinal and Liver Physi-
+[10] Katherine L Bouman, Bei Xiao, Peter Battaglia, and                        ology, 293(6):G1147–G1154, 2007. 1
+     William T Freeman. Estimating the material properties of             [23] N. Gucunski and R. D. Woods. Numerical simulation of the
+     fabric from video. In Proceedings of the IEEE International               SASW test. Soil Dynamics and Earthquake Engineering, 11
+     Conference on Computer Vision, pages 1984–1991, Sydney,                   (4):213–227, 1992. 2
+     Australia, 2013. IEEE. 2                                             [24] Ray Hashman Hashemi, William G Bradley, and Christo-
+[11] Nathalie J Bureau and Daniela Ziegler. Economics of mus-                  pher J Lisanti. MRI: the basics: The Basics. Lippincott
+     culoskeletal ultrasound. Current radiology reports, 4:1–7,                Williams & Wilkins, 2012. 2
+     2016. 1, 2                                                           [25] Kenneth Hoyt, Benjamin Castaneda, Man Zhang, Priya Nig-
+[12] Ziyang Chen, Shengyi Qian, and Andrew Owens. Sound                        wekar, P Anthony di Sant’Agnese, Jean V Joseph, John
+     localization from motion: Jointly learning sound direction                Strang, Deborah J Rubens, and Kevin J Parker. Tissue elas-
+     and camera rotation. International Conference on Computer                 ticity properties as biomarkers for prostate cancer. Cancer
+     Vision (ICCV), 2023. 2                                                    Biomarkers, 4(4-5):213–225, 2008. 1
+[13] Abe Davis, Michael Rubinstein, Neal Wadhwa, Gautham                  [26] Hao Huang, Ray S Wu, Muyang Lin, and Sheng Xu. Emerg-
+     Mysore, Fredo Durand, and William T. Freeman. The visual                  ing wearable ultrasound technology. IEEE Transactions on
+
+
+                                                                      9
+     Ultrasonics, Ferroelectrics, and Frequency Control, 71(7):           [40] Mihra S. Taljanovic, Lana H. Gimber, Giles W. Becker,
+     713–729, 2023. 2                                                          L. Daniel Latt, Andrea S. Klauser, David M. Melville, Liang
+[27] Yousef Javanmardi, Huw Colin-York, Nicolas Szita, Marco                   Gao, and Russell S. Witte. Shear-Wave Elastography: Basic
+     Fritzsche, and Emad Moeendarbary. Quantifying cell-                       Physics and Musculoskeletal Applications. RadioGraphics,
+     generated forces: Poisson’s ratio matters. Communications                 37(3):855–870, 2017. 1, 2
+     physics, 4(1):237, 2021. 3                                           [41] N. H. Varady and A. J. Grodzinsky. Osteoarthritis year in
+[28] Jitesh Jodhani, Abhay Handa, Anandita Gautam, Ramakant                    review 2015: Mechanics. Osteoarthritis and Cartilage, 24
+     Rana, et al. Ultrasonic non-destructive evaluation of compos-             (1):27–35, 2016. 1
+     ites: A review. Materials Today: Proceedings, 78:627–632,            [42] Kelley M. Virgilio, Kyle S. Martin, Shayn M. Peirce, and
+     2023. 2                                                                   Silvia S. Blemker. Multiscale models of skeletal muscle
+[29] Sangwoo Kwon, Woochul Yang, Donggerami Moon, and                          reveal the complex effects of muscular dystrophy on tissue
+     Kyung Sook Kim. Comparison of Cancer Cell Elasticity by                   mechanics and damage susceptibility. Interface Focus, 5(2):
+     Cell Type. Journal of Cancer, 11(18):5403–5412, 2020. 1                   20140080, 2015. 1
+[30] Lilian Lacourpaille, François Hug, Arnaud Guével, Yann             [43] Neal Wadhwa, Michael Rubinstein, Frédo Durand, and
+     Péréon, Armelle Magot, Jean-Yves Hogrel, and Antoine                    William T Freeman. Phase-based video motion processing.
+     Nordez. Non-invasive assessment of muscle stiffness in pa-                ACM Transactions on Graphics (TOG), 32(4):1–10, 2013. 3
+     tients with duchenne muscular dystrophy. Muscle & Nerve,             [44] Bohan Wang, Yili Zhao, and Jernej Barbič. Botanical materi-
+     51(2):284–286, 2015. 1                                                    als based on biomechanics. ACM Transactions on Graphics
+[31] Chih-Ping Lin, Chun-Hung Lin, and Chih-Jung Chien. Dis-                   (TOG), 36(4):1–13, 2017. 2
+     persion analysis of surface wave testing – SASW vs. MASW.            [45] Zhou Wang, A.C. Bovik, H.R. Sheikh, and E.P. Simoncelli.
+     Journal of Applied Geophysics, 143:223–230, 2017. 2                       Image quality assessment: From error visibility to structural
+[32] Yogesh K. Mariappan, Kevin J. Glaser, and Richard L.                      similarity. IEEE Transactions on Image Processing, 13(4):
+     Ehman. Magnetic resonance elastography: A review. Clini-                  600–612, 2004. 4, 11
+     cal Anatomy, 23(5):497–511, 2010. 1, 2                               [46] Paul Webb. Introduction to oceanography. Roger Williams
+[33] Eder Miguel, Derek Bradley, Bernhard Thomaszewski,                        University, 2021. 1
+     Bernd Bickel, Wojciech Matusik, Miguel A Otaduy, and
+                                                                          [47] Vincent Wai-Sun Wong and Henry Lik-Yuen Chan. Tran-
+     Steve Marschner. Data-driven estimation of cloth simula-
+                                                                               sient elastography. Journal of Gastroenterology and Hepa-
+     tion models. In Computer Graphics Forum, pages 519–528,
+                                                                               tology, 25(11):1726–1731, 2010. 1, 2
+     Hoboken, NJ, USA, 2012. Wiley Online Library, Wiley On-
+                                                                          [48] S Zörner, M Kaltenbacher, R Lerch, A Sutor, and M
+     line Library. 2
+                                                                               Döllinger. Measurement of the elasticity modulus of soft
+[34] Soheil Nazarian and Kenneth Stokoe. Evaluation of Mod-
+                                                                               tissues. Journal of Biomechanics, 43(8):1540–1545, 2010. 6
+     uli and Thicknesses of Pavement Systems by Spectral-
+     Analysis-of-Surface-Waves Method. The Study of New Tech-
+     nologies for Pavement Evaluation Research Project 3-8-80-
+     256, as conducted for Texas State Department of Highways
+     and Public Transportation, by the CENTER FOR TRANS-
+     PORTATION RESEARCH BUREAU OF ENGINEERING
+     RESEARCH THE UNIVERSITY OF TEXAS AT AUSTIN,
+     1983. 2
+[35] Choon Park. MASW for geotechnical site investigation. The
+     Leading Edge, 32(6):656–662, 2013. 2
+[36] Babette S. Zemel. Chapter 18 - body composition during
+     growth and development. In Human Growth and Devel-
+     opment (Second Edition), pages 461–486. Academic Press,
+     Boston, second edition edition, 2012. 3
+[37] Nikolai M. Shapiro, Michel Campillo, Laurent Stehly, and
+     Michael H. Ritzwoller. High-Resolution Surface-Wave To-
+     mography from Ambient Seismic Noise. Science, 307
+     (5715):1615–1618, 2005. 2
+[38] Eero P Simoncelli and William T Freeman. The steerable
+     pyramid: A flexible architecture for multi-scale derivative
+     computation. In Proceedings., International Conference on
+     Image Processing, pages 444–447, Washington, D.C., USA,
+     1995. IEEE, IEEE. 3
+[39] Shan Sun, Zhenyuan Song, Scott J. Cotler, and Michael Cho.
+     Biomechanics and functionality of hepatocytes in liver cir-
+     rhosis. Journal of Biomechanics, 47(9):2205–2210, 2014.
+     1
+
+
+                                                                     10
+A. Runtime analysis                                                   given by
+                                                                                                            −d2min
+The primary computational cost of VSWT stems from cal-                               v(ωim , γim ) = exp(          )            (7)
+                                                                                                             2σ 2
+culating dispersion relations to fit observed data. To address
+this efficiently, we precomputed dispersion relation datasets         where
+over grids of stiffness and thickness values suitable for soft                                p
+                                                                      dmin (ωim , γim ) = min( (ωim − ωci (γc ))2 + (γim − γc )2 )
+tissue characterization. These datasets can be reused for                                 γc ,i
+multiple fitting scenarios, eliminating the need for repeated                                                                    (8)
+dispersion calculations. Although employing more efficient            where ωci (γc ) denotes the dispersion relation in curve form
+optimization methods than grid search would substantially             on any band i, and σ is a parameter that controls the width
+reduce computational cost, we provide representative run-             of the curve once converted to image form.
+times below to illustrate the expense associated with com-               We use standard definitions of MSE, PSNR, and SSIM
+puting dispersion relations in this study.                            [45].
+    In each dispersion dataset, there are several parameters
+that have bearing on the cost to compute the dataset. For
+the computation of a dispersion dataset containing 12 eigen-
+value branches and 60 wavenumber values, on a grid of 41
+stiffness values (E) × 41 thickness values, the runtime for
+various numbers of elements corresponding to different el-
+ement sizes e are tabulated below. Computations were per-
+formed on an Intel Xeon CPU E5-2663 v3 with 20 cores,
+and all computations used less than 64 GB of memory.
+While we found e = 0.5, Nele = 240 to be sufficient
+for reasonable performance in our settings, using smaller
+e with higher Nele may be desirable for more accuracy or
+to model. The compu
+• e = 0.5 mm, Nele = 240 had runtime of 157 s
+• e = 0.25 mm, Nele = 960 had runtime of 470 s
+• e = 0.125 mm, Nele = 3840 had runtime of 3169 s
+
+B. Optimization objective functions
+Here we define the objective functions we considered when
+developing our approach. Recall that Dobs is the observed
+FFT-derived dispersion relation. For a given hypothesized
+(T, E) pair, D(T, E) is the physics-based dispersion rela-
+tion, and Dhyp (T, E) is the image version of D(T, E).
+
+Curve-based objective function We define a simple and
+intuitive curve-based objective function f that assigns
+points for the observed dispersion relation having high mag-
+nitude at the points that exist in the hypothesized physics-
+based dispersion relation D(T, E) = {ω(γ)}N        i=1 ∀γ ∈
+[0, π/a]:
+
+                         N Z π/a
+                         X
+  f (D(T, E), Dobs ) =              Dobs (γ, ωi (γ)) dγ. (6)
+                         i=1   0
+
+
+
+Image-based objective functions To convert the disper-
+sion relations from curve format to image format, we assign
+pixel values with a Gaussian kernel based on the distance
+from the pixel to any point on any of the curves. More pre-
+cisely, the value of a pixel located at point (γim , ωim ) is
+
+
+                                                                 11
+
