@@ -103,28 +103,35 @@ Each entry contains the claim, the verbatim excerpt, the page number, the sectio
 
 If the claim is `contradicted` or `silent` (paper does not address it), the narrative is corrected using the verbatim excerpt as the ground truth. The audit document (`hallucination_audit.md`) records every correction made, so the final narrative's relationship to the paper is traceable end-to-end.
 
-Across all 6 runs: **113 journal entries**, **4 corrections** applied, **0 outright hallucinations**. ~3.5% correction rate. For the reference Bouman VVT run alone: 17 entries, 16 supports + 1 partially_supports (the overgeneralization documented in `hallucination_audit.md`).
+Across all 8 OpenAI-baseline runs (6 original + Bouman VSWE smoke test + FNO Phase 2 baseline): **~168 journal entries**, **5 corrections** applied, **0 outright hallucinations**. ~3% correction rate. For the reference Bouman VVT run alone: 17 entries, 16 supports + 1 partially_supports (the overgeneralization documented in `hallucination_audit.md`).
 
 ## Status
 
-**Working, validated across 6 papers end-to-end.** The reference Bouman VVT run was iterated v1 → v4 to tune the delight brief; the subsequent multi-paper parallel run shipped 5 more papers (Mishra, Tao, Nakamura-Uhlmann, Karniadakis, LeCun) using the v4-tuned brief in a single ~17 minute wall-clock parallel dispatch. The autonomous-background-agent architecture and the information-expert principle for upload-and-share were both validated.
+**Working, validated across 8 papers end-to-end, and now with an ElevenLabs-enhanced sibling track.** The reference Bouman VVT run was iterated v1 → v4 to tune the delight brief; the subsequent multi-paper parallel run shipped 5 more papers (Mishra, Tao, Nakamura-Uhlmann, Karniadakis, LeCun) using the v4-tuned brief in a single ~17 minute wall-clock parallel dispatch. Bouman VSWE was added as the smoke test of `/download-podcastify-and-share`. FNO (Li et al. ICLR 2021) was added as the Phase 2 manual ElevenLabs experimentation. The autonomous-background-agent architecture and the information-expert principle for upload-and-share were validated; the background-agent feasibility gate for ElevenLabs autonomy was also empirically passed.
 
 Audio quality at voice `nova` + `audify --speed 0.85` lands consistently at 16–17 min per podcast. Content + pacing now match or beat NotebookLM in places — see e.g. the Mishra/N-to-D operator explanation that grounded the abstract operator-in / operator-out architecture as the physical "apply forces and watch displacements on the boundary" mapping.
 
-Next steps (see `roadmap.md` for the live plan):
-- **Package the proven pipeline as 3 globally-available Claude Code skills:** `/podcastify`, `/podcastify-and-share`, `/download-podcastify-and-share` (this is the active phase as of 2026-05-24)
-- **Close the voice-quality gap** by switching `audify` to an ElevenLabs backend for emotional regulation (OpenAI TTS is competent but uncanny-valley-flat)
-- *No longer high-priority:* the originally-planned empirical-style-extraction project in `notebooklm_audio_data_driven_learning.md` — current quality already matches/beats NotebookLM in places, so transcribing NotebookLM episodes to learn its style isn't the right next investment
+**The ElevenLabs upgrade path has shipped.** Four new globally-available skills (`/audify-eleven`, `/podcastify-plus`, `/podcastify-plus-and-share`, `/download-podcastify-plus-and-share`) mirror the original audify + podcastify trio but use ElevenLabs `eleven_v3` with Matilda voice + inline audio tags (`[warmly]`, `[excited]`, `[awe]`, `[whispers]`, `[sighs]`, etc.) for emotional regulation. The existing 4 skills (`audify`, `podcastify`, `podcastify-and-share`, `download-podcastify-and-share`) remain untouched as the OpenAI-TTS baseline. See `podcastify-plus-with-eleven-labs.md` for the build roadmap and `runs/fno_li2020/narrative_v3_tagged.md` for the reference hand-crafted tagged-narrative format. Nakamura-Uhlmann was used as the Phase 5 smoke test of the shipped `/podcastify-plus-and-share` skill — 53 tags, 16:06 enhanced mp3, baseline preserved in parent dir.
+
+Shipped via the `podcastify-plus-with-eleven-labs.md` roadmap (all 6 phases complete, 2026-05-24):
+- ✅ Phase 1 ElevenLabs capability research (5 parallel lanes, official MCP confirmed, v3 tag taxonomy documented)
+- ✅ Phase 2 FNO manual experimentation (baseline + hand-tagged + enhanced, shared to vivekjobapp123@gmail.com)
+- ✅ Phase 3 background-agent feasibility gate (passed empirically on 700-char test narrative)
+- ✅ Phase 4 4 -plus skills shipped (audify-eleven + 3 podcastify-plus variants)
+- ✅ Phase 5 Nakamura-Uhlmann smoke test of `/podcastify-plus-and-share`
+- ✅ Phase 6 closing sequence (sync-os + gitcommit + gitpush)
+
+*No longer high-priority:* the originally-planned empirical-style-extraction project in `notebooklm_audio_data_driven_learning.md` — current quality already matches/beats NotebookLM in places, so transcribing NotebookLM episodes to learn its style isn't the right next investment.
 
 ## Reproducing the pipeline
 
 This repo doesn't ship as a CLI; it documents an architecture executed by a Claude Code session driving the listed skills. To reproduce a similar run you would need:
 
 - A working [Claude Code](https://claude.com/claude-code) install
-- The skills: `paper-download-hack`, `ask-question-about-paper`, `find-evidence-in-paper`, `text-to-highlight-in-paper`, `audify`, `upload-and-share`, `swarm`, `new-md`
-- `OPENAI_API_KEY` in env (for `audify`)
+- The skills: `paper-download-hack`, `ask-question-about-paper`, `find-evidence-in-paper`, `text-to-highlight-in-paper`, `audify`, `upload-and-share`, `swarm`, `new-md` (OpenAI-baseline track) — and for the ElevenLabs track: `audify-eleven`, `podcastify-plus`, `podcastify-plus-and-share`, `download-podcastify-plus-and-share`
+- `OPENAI_API_KEY` in env (for `audify`) — and for the ElevenLabs track, `ELEVENLABS_API_KEY` (Starter tier or higher; free tier blocks API library voices with HTTP 402)
 - A Google Workspace CLI (`gws`) auth set up if you want `/upload-and-share`
-- `pdftotext`, `ffmpeg`, and a recent Python 3 on PATH
+- `pdftotext`, `ffmpeg`, and a recent Python 3 on PATH (plus `pip install --user elevenlabs` for the ElevenLabs track)
 
 Fire the pipeline against a paper by giving the spec file to Claude Code as a `/goal` and letting the autonomous background agent in `problem_statement_podcast_from_scratch.md` run it.
 
@@ -134,4 +141,4 @@ No license declared. This is a personal research-engineering experiment; reach o
 
 ## Author
 
-[Vivek Karmarkar](https://github.com/VivekKarmarkar). Built collaboratively with Claude (Opus 4.7, 1M context) over a single iterative session on 2026-05-23/24.
+[Vivek Karmarkar](https://github.com/VivekKarmarkar). Built collaboratively with Claude (Opus 4.7, 1M context) over iterative sessions on 2026-05-23/24, with the ElevenLabs-enhanced sibling track added on 2026-05-24.
