@@ -10,6 +10,16 @@ The aesthetic target is something like NotebookLM's two-host podcasts, transpose
 
 This repo is the **specification, intermediate artifacts, and worked example** for that pipeline. It is not a packaged tool you can `pip install`. It documents an architecture and one working run of it.
 
+## Project showcase — website + explainer videos
+
+A single-page **project-showcase site** lives in `claudecodelm-website/`, with a portable, self-contained copy in `cloudcodelm reference project website/` (drop-in for a personal site). It walks the project's story — the abstraction ladder, the post-pivot architecture as an interactive animated diagram, and the voice→spec→`/goal` design philosophy — and embeds the Nakamura–Uhlmann *-plus* podcast alongside three explainer videos:
+
+- **Demo** (~1 min) — the product demo: https://youtu.be/Q_IQ2MiEk_g
+- **Architecture explainer** (~2 min) — a narrated walkthrough of the pipeline: https://youtu.be/WaYVJCHWjaI
+- **Comprehensive walkthrough** (~3 min) — demo + architecture stitched into one tour: https://youtu.be/xfFaYYOpf0k
+
+The video source files live under `project-explainer-videos/` (not tracked in git — large binaries).
+
 ## The pipeline (7 phases)
 
 | Phase | What happens | Load-bearing skill |

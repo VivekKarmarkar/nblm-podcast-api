@@ -32,18 +32,13 @@ body {
 .section-text p:last-child { margin-bottom: 0; }
 .mono { font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace; color: #f97316; }
 
-/* ─── Video embeds / placeholders ──────────────────── */
+/* ─── Video embeds (YouTube) ───────────────────────── */
 .video-section { padding: 56px 24px; }
 .video-wrap { max-width: 760px; margin: 0 auto; }
 .video-eyebrow { display:block; text-align:center; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:#f97316; margin-bottom:14px; font-weight:700; }
 .video-caption { display:block; text-align:center; font-size:14px; color:#9a9a9a; margin-top:14px; }
 .video-frame { position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; background:#15161f; border:1px solid rgba(255,255,255,0.08); }
 .video-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-/* placeholder state — shown until the real YouTube iframe is pasted in */
-.video-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; border-style:dashed; border-color:rgba(249,115,22,0.45); background:repeating-linear-gradient(45deg,#15161f,#15161f 14px,#171823 14px,#171823 28px); text-align:center; padding:24px; }
-.video-placeholder .vp-play { width:54px; height:54px; border-radius:50%; border:2px solid #f97316; display:flex; align-items:center; justify-content:center; color:#f97316; font-size:20px; }
-.video-placeholder .vp-title { font-weight:700; color:#e0e0e0; font-size:18px; }
-.video-placeholder .vp-note { font-size:13px; color:#8a8a8a; font-family:'SF Mono','Cascadia Code',monospace; }
 
 /* ─── 1. Hero ──────────────────────────────────────── */
 .hero { text-align: center; padding: 120px 24px 80px; }
@@ -270,20 +265,13 @@ audio { width: 100%; outline: none; }
 </section>
 
 <!-- ════════════════════════════════════════════════════ -->
-<!-- VIDEO: Demo (60-second product demo) — EMBED PLACEHOLDER -->
-<!-- TODO (once uploaded to YouTube): replace the inner .video-placeholder
-     div with the embed iframe, keeping the .video-frame wrapper:
-       <iframe src="https://www.youtube.com/embed/VIDEO_ID"
-         title="ClaudeCodeLM Demo" allowfullscreen
-         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>  -->
+<!-- VIDEO: Demo (60-second product demo)                -->
 <!-- ════════════════════════════════════════════════════ -->
 <section class="video-section">
   <div class="video-wrap">
     <span class="video-eyebrow">Watch &middot; 60-second demo</span>
-    <div class="video-frame video-placeholder" data-video="demo">
-      <div class="vp-play">&#9654;</div>
-      <div class="vp-title">Demo &mdash; see it in 60 seconds</div>
-      <div class="vp-note">YouTube embed goes here</div>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/Q_IQ2MiEk_g" title="ClaudeCodeLM Demo" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
     </div>
     <span class="video-caption">From a voice note on a walk to a grounded podcast in your inbox &mdash; the whole idea, fast.</span>
   </div>
@@ -420,14 +408,11 @@ audio { width: 100%; outline: none; }
 <section class="arch-section">
   <h2 class="section-header">Architecture (Post-Pivot)</h2>
 
-  <!-- VIDEO: Architecture explainer — EMBED PLACEHOLDER -->
-  <!-- TODO: swap the inner .video-placeholder for the YouTube iframe (VIDEO_ID), keep .video-frame -->
+  <!-- VIDEO: Architecture explainer -->
   <div class="video-wrap" style="margin-bottom:52px;">
     <span class="video-eyebrow">Watch &middot; narrated walkthrough</span>
-    <div class="video-frame video-placeholder" data-video="architecture">
-      <div class="vp-play">&#9654;</div>
-      <div class="vp-title">Architecture explainer &mdash; ~2 min</div>
-      <div class="vp-note">YouTube embed goes here</div>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/WaYVJCHWjaI" title="ClaudeCodeLM Architecture Explainer" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
     </div>
     <span class="video-caption">The narrated tour of the pipeline &mdash; watch it, then explore the interactive diagram below.</span>
   </div>
@@ -768,16 +753,13 @@ audio { width: 100%; outline: none; }
 </section>
 
 <!-- ════════════════════════════════════════════════════ -->
-<!-- VIDEO: Long walkthrough (full ~3-min tour) — EMBED PLACEHOLDER -->
-<!-- TODO: swap the inner .video-placeholder for the YouTube iframe (VIDEO_ID), keep .video-frame -->
+<!-- VIDEO: Comprehensive walkthrough (full ~3-min tour) -->
 <!-- ════════════════════════════════════════════════════ -->
 <section class="video-section">
   <div class="video-wrap">
     <span class="video-eyebrow">Watch &middot; the full walkthrough</span>
-    <div class="video-frame video-placeholder" data-video="long-walkthrough">
-      <div class="vp-play">&#9654;</div>
-      <div class="vp-title">Full walkthrough &mdash; ~3 min</div>
-      <div class="vp-note">YouTube embed goes here</div>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/xfFaYYOpf0k" title="ClaudeCodeLM Comprehensive Walkthrough" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
     </div>
     <span class="video-caption">The complete tour in one watch &mdash; the demo, a bridge, then a deeper dive into the architecture.</span>
   </div>

@@ -32,6 +32,14 @@ body {
 .section-text p:last-child { margin-bottom: 0; }
 .mono { font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace; color: #f97316; }
 
+/* ─── Video embeds (YouTube) ───────────────────────── */
+.video-section { padding: 56px 24px; }
+.video-wrap { max-width: 760px; margin: 0 auto; }
+.video-eyebrow { display:block; text-align:center; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:#f97316; margin-bottom:14px; font-weight:700; }
+.video-caption { display:block; text-align:center; font-size:14px; color:#9a9a9a; margin-top:14px; }
+.video-frame { position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; background:#15161f; border:1px solid rgba(255,255,255,0.08); }
+.video-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+
 /* ─── 1. Hero ──────────────────────────────────────── */
 .hero { text-align: center; padding: 120px 24px 80px; }
 .hero h1 {
@@ -257,6 +265,19 @@ audio { width: 100%; outline: none; }
 </section>
 
 <!-- ════════════════════════════════════════════════════ -->
+<!-- VIDEO: Demo (60-second product demo)                -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="video-section">
+  <div class="video-wrap">
+    <span class="video-eyebrow">Watch &middot; 60-second demo</span>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/Q_IQ2MiEk_g" title="ClaudeCodeLM Demo" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+    </div>
+    <span class="video-caption">From a voice note on a walk to a grounded podcast in your inbox &mdash; the whole idea, fast.</span>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
 <!-- 2. AUDIO (Nakamura-Uhlmann -plus)                   -->
 <!-- ════════════════════════════════════════════════════ -->
 <section class="audio-section">
@@ -386,6 +407,15 @@ audio { width: 100%; outline: none; }
 <!-- ════════════════════════════════════════════════════ -->
 <section class="arch-section">
   <h2 class="section-header">Architecture (Post-Pivot)</h2>
+
+  <!-- VIDEO: Architecture explainer -->
+  <div class="video-wrap" style="margin-bottom:52px;">
+    <span class="video-eyebrow">Watch &middot; narrated walkthrough</span>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/WaYVJCHWjaI" title="ClaudeCodeLM Architecture Explainer" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+    </div>
+    <span class="video-caption">The narrated tour of the pipeline &mdash; watch it, then explore the interactive diagram below.</span>
+  </div>
 
   <div class="arch-diagram">
     <div class="arch-legend">
@@ -719,6 +749,19 @@ audio { width: 100%; outline: none; }
       <p>This very project is an example. The contract was <span class="mono">problem_statement.md</span>: motivation, the 4-level ladder, Phase 1's branch logic (terminate if nothing surfaces, proceed if something does), Phase 2's two-test plan. When Phase 1 came back with verdict (c), the contract's branch logic said proceed-with-build-it-yourself; the autonomous run took that branch without further input. The voice-shaped, markdown-committed contract <em>is</em> the discipline that keeps the agent honest when the ladder breaks.</p>
       <p>And the result ships the way every artifact here does &mdash; as a git repository: not a locked product but a malleable blueprint, a Claude Code skill you clone, point Claude at, and reshape to fit your own agents.</p>
     </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- VIDEO: Comprehensive walkthrough (full ~3-min tour) -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="video-section">
+  <div class="video-wrap">
+    <span class="video-eyebrow">Watch &middot; the full walkthrough</span>
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/xfFaYYOpf0k" title="ClaudeCodeLM Comprehensive Walkthrough" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+    </div>
+    <span class="video-caption">The complete tour in one watch &mdash; the demo, a bridge, then a deeper dive into the architecture.</span>
   </div>
 </section>
 
