@@ -39,3 +39,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Playwright MCP temp (console logs, snapshots)
+.playwright-mcp/
