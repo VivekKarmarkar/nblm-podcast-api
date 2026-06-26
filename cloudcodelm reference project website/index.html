@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClaudeCodeLM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Global ───────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: #0f1019;
+  color: #e0e0e0;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Layout helpers ───────────────────────────────── */
+.section { padding: 80px 24px; }
+.section-inner { max-width: 700px; margin: 0 auto; }
+.section-header {
+  font-size: 32px; font-weight: 700; color: #e0e0e0;
+  margin-bottom: 48px; text-align: center; letter-spacing: 0.5px;
+}
+.section-text p { margin-bottom: 1.4em; color: #c8c8c8; }
+.section-text p:last-child { margin-bottom: 0; }
+.mono { font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace; color: #f97316; }
+
+/* ─── 1. Hero ──────────────────────────────────────── */
+.hero { text-align: center; padding: 120px 24px 80px; }
+.hero h1 {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700; color: #e0e0e0;
+  letter-spacing: 1px; line-height: 1.15;
+}
+.hero .tagline { margin-top: 16px; font-size: 17px; color: #a0a0a0; letter-spacing: 0.3px; max-width: 760px; margin-left: auto; margin-right: auto; }
+.hero-tags-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 24px auto 0; width: fit-content; }
+.hero-tags { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-tag { padding: 6px 18px; border-radius: 20px; font-size: 14px; letter-spacing: 0.3px; }
+.tag-tech-primary { color: #f97316; border: 1px solid #f9731640; }
+.tag-tech-secondary { color: #f97316b0; border: 1px solid #f9731630; }
+.tag-tech-tertiary { color: #f9731680; border: 1px solid #f9731620; }
+.tag-domain-primary { color: #38bdf8; border: 1px solid #38bdf840; }
+.tag-domain-secondary { color: #38bdf8a0; border: 1px solid #38bdf825; }
+.tag-audience { color: #4ade80; border: 1px solid #4ade8040; }
+.tag-audience-secondary { color: #4ade80a0; border: 1px solid #4ade8025; }
+
+/* ─── 2. Audio ─────────────────────────────────────── */
+.audio-section { padding: 0 24px 80px; }
+.audio-wrap {
+  max-width: 720px; margin: 0 auto;
+  background: linear-gradient(135deg, #14172a, #1a1d2e);
+  border: 1px solid #23263a;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+}
+.audio-label {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px; flex-wrap: wrap; gap: 12px;
+}
+.audio-title {
+  font-size: 14px; font-weight: 700; color: #f97316;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.audio-subtitle { font-size: 13px; color: #8888aa; }
+.audio-meta {
+  display: flex; gap: 16px; margin-top: 14px;
+  font-size: 12px; color: #606580;
+  font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;
+  flex-wrap: wrap;
+}
+.audio-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.audio-meta strong { color: #a0a0a0; font-weight: 400; }
+audio { width: 100%; outline: none; }
+
+/* ─── 3b. Abstraction Ladder ──────────────────────── */
+.ladder-section { padding: 80px 24px; }
+.ladder-container {
+  display: flex; flex-direction: column; gap: 0;
+  position: relative; padding-left: 40px;
+  max-width: 900px; margin: 0 auto;
+}
+.ladder-spine {
+  position: absolute; left: 58px; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to top, #1a1c2a, #f97316);
+  border-radius: 2px;
+}
+.ladder-rung {
+  display: flex; align-items: stretch; position: relative;
+  padding: 0; transition: all 0.3s ease; cursor: default;
+}
+.ladder-rung:hover .rung-main { background: #1e2030; }
+.ladder-rung:hover .rung-constraint { color: #e0e0e0; }
+.rung-dot {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #2e3140; border: 2px solid #404560;
+  z-index: 2; transition: all 0.3s ease;
+}
+.ladder-rung:hover .rung-dot {
+  border-color: #f97316; background: #f97316;
+  box-shadow: 0 0 8px rgba(249,115,22,0.4);
+}
+.rung-main {
+  flex: 1; display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 14px 36px; border-radius: 8px;
+  transition: background 0.3s ease; gap: 16px;
+}
+.rung-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.rung-era {
+  font-size: 11px; color: #606580;
+  font-family: 'SF Mono','Cascadia Code','Fira Code',Consolas,monospace;
+  min-width: 70px; flex-shrink: 0;
+}
+.rung-name { font-size: 14px; color: #c8c8c8; font-weight: 500; white-space: nowrap; }
+.rung-constraint {
+  font-size: 12px; color: #606580; font-style: italic;
+  text-align: right; transition: color 0.3s ease;
+  flex-shrink: 0; max-width: 380px;
+}
+.rung-highlight .rung-dot {
+  background: #f97316; border-color: #f97316;
+  box-shadow: 0 0 12px rgba(249,115,22,0.5);
+  width: 15px; height: 15px;
+}
+.rung-highlight .rung-name { color: #f97316; font-weight: 700; font-size: 15px; }
+.rung-highlight .rung-constraint { color: #a0a0a0; }
+.rung-top .rung-dot {
+  background: #f97316; border-color: #fbbf24;
+  box-shadow: 0 0 18px rgba(249,115,22,0.7);
+  width: 17px; height: 17px;
+  animation: pulse-ladder-dot 2s ease-in-out infinite;
+}
+.rung-top .rung-name { color: #fbbf24; font-weight: 700; font-size: 16px; }
+.rung-top .rung-constraint { color: #c8c8c8; font-weight: 500; font-style: normal; }
+@keyframes pulse-ladder-dot {
+  0%, 100% { box-shadow: 0 0 12px rgba(249,115,22,0.5); }
+  50% { box-shadow: 0 0 24px rgba(249,115,22,0.9); }
+}
+.ladder-label { text-align: center; margin-top: 24px; font-size: 12px; color: #606580; font-style: italic; }
+@media (max-width: 700px) {
+  .rung-constraint { display: none; }
+  .rung-main { padding: 10px 12px 10px 30px; }
+  .rung-era { min-width: 50px; font-size: 10px; }
+  .rung-name { font-size: 12px; }
+  .ladder-container { padding-left: 30px; }
+  .ladder-spine { left: 48px; }
+  .rung-dot { left: 8px; }
+}
+
+/* ─── 4. Architecture ──────────────────────────────── */
+.arch-section { padding: 80px 24px; }
+.arch-section .section-header { max-width: 700px; margin: 0 auto 48px; }
+.arch-diagram { max-width: 1100px; margin: 0 auto 56px; }
+.arch-diagram .arch-legend { display: flex; justify-content: center; gap: 36px; padding: 0 24px 18px; flex-wrap: wrap; }
+.arch-diagram .legend-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.arch-diagram .legend-top { display: flex; align-items: center; gap: 8px; }
+.arch-diagram .legend-emoji { font-size: 22px; }
+.arch-diagram .legend-name { font-weight: 700; font-size: 16px; }
+.arch-diagram .legend-model { color: #888; font-weight: 400; font-size: 12px; }
+.arch-diagram .arch-canvas { width: 100%; aspect-ratio: 980 / 520; max-height: 520px; }
+.arch-diagram .arch-canvas svg { width: 100%; height: 100%; display: block; }
+.arch-diagram .node rect { cursor: pointer; transition: stroke-width 0.15s, filter 0.15s; }
+.arch-diagram .node:hover rect { stroke-width: 2.8; }
+.arch-diagram .node-emoji { font-size: 17px; pointer-events: none; }
+.arch-diagram .node-label { font-size: 11.5px; font-weight: 700; pointer-events: none; }
+.arch-diagram .step-num { font-size: 9px; pointer-events: none; fill: #555; }
+.arch-diagram .scaffold-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; pointer-events: none; }
+.arch-diagram .arch-detail {
+  background: #161822; border-top: 1px solid #2e3140;
+  border-radius: 0 0 12px 12px; padding: 14px 24px;
+  min-height: 64px; display: flex; align-items: center; gap: 18px;
+}
+.arch-diagram .arch-detail .d-icon { font-size: 26px; flex-shrink: 0; }
+.arch-diagram .arch-detail .d-name { color: #f97316; font-weight: 700; font-size: 15px; min-width: 180px; flex-shrink: 0; }
+.arch-diagram .arch-detail .d-desc { color: #bbb; font-size: 13px; line-height: 1.55; flex: 1; }
+@media (max-width: 640px) {
+  .arch-diagram .arch-detail { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .arch-diagram .arch-detail .d-name { min-width: 0; }
+}
+
+/* ─── 5b. Voice-flow diagram (Design Philosophy) ──── */
+.voiceflow-wrap { max-width: 1100px; margin: 32px auto 36px; }
+.voiceflow-canvas { width: 100%; aspect-ratio: 980 / 240; max-height: 240px; }
+.voiceflow-canvas svg { width: 100%; height: 100%; display: block; }
+.voiceflow-canvas .vnode rect { cursor: pointer; transition: stroke-width 0.15s, filter 0.15s; }
+.voiceflow-canvas .vnode:hover rect { stroke-width: 2.8; }
+.voiceflow-canvas .vnode-emoji { font-size: 18px; pointer-events: none; }
+.voiceflow-canvas .vnode-label { font-size: 11.5px; font-weight: 700; pointer-events: none; }
+.voiceflow-detail {
+  background: #161822; border-top: 1px solid #2e3140;
+  border-radius: 12px; padding: 14px 24px;
+  min-height: 64px; display: flex; align-items: center; gap: 18px;
+  margin-top: 8px;
+}
+.voiceflow-detail .vd-icon { font-size: 26px; flex-shrink: 0; }
+.voiceflow-detail .vd-name { color: #f97316; font-weight: 700; font-size: 15px; min-width: 180px; flex-shrink: 0; }
+.voiceflow-detail .vd-desc { color: #bbb; font-size: 13px; line-height: 1.55; flex: 1; }
+@media (max-width: 640px) {
+  .voiceflow-detail { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .voiceflow-detail .vd-name { min-width: 0; }
+}
+
+/* ─── 7. GitHub footer ─────────────────────────────── */
+.github-footer {
+  text-align: center; padding: 60px 24px 80px;
+  display: flex; justify-content: center; gap: 40px;
+}
+.github-footer a {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: #a0a0a0; text-decoration: none; font-size: 16px;
+  transition: color 0.2s;
+}
+.github-footer a:hover { color: #e0e0e0; }
+.github-footer svg { fill: currentColor; }
+
+/* ─── Responsive ───────────────────────────────────── */
+@media (max-width: 640px) {
+  .hero { padding: 80px 20px 60px; }
+  .section { padding: 60px 20px; }
+  .arch-section { padding: 60px 16px; }
+  .section-header { font-size: 26px; margin-bottom: 36px; }
+  .audio-wrap { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 1. HERO                                             -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="hero">
+  <h1>ClaudeCodeLM</h1>
+  <p class="tagline">The step-count-driven, voice-first research workflow has one layer that breaks: generating a NotebookLM audio podcast while walking. The motivation for this project was finding a clean way to delegate that step. The search returned nothing usable &mdash; so it got built from scratch. It has the shape of a product, but it's the blueprint for a customizable skill that makes your AI agents happy&hellip; if you live in coding agents&hellip; &#128578;</p>
+  <div class="hero-tags-wrap">
+    <div class="hero-tags">
+      <span class="hero-tag tag-tech-primary">Claude Code</span>
+      <span class="hero-tag tag-tech-secondary">Agentic AI</span>
+    </div>
+    <div class="hero-tags">
+      <span class="hero-tag tag-domain-primary">Document Analysis</span>
+    </div>
+    <div class="hero-tags">
+      <span class="hero-tag tag-audience">AI Startups</span>
+      <span class="hero-tag tag-audience-secondary">NotebookLM Team</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 2. AUDIO (Nakamura-Uhlmann -plus)                   -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="audio-section">
+  <div class="audio-wrap">
+    <div class="audio-label">
+      <span class="audio-title">&#127908; Listen &mdash; What Got Built</span>
+      <span class="audio-subtitle">Single host &middot; grounded in the paper &middot; shorter than NotebookLM</span>
+    </div>
+    <audio controls preload="auto">
+      <source src="podcast.mp3" type="audio/mpeg">
+      Your browser doesn't support inline audio. <a href="podcast.mp3">Download the mp3</a>.
+    </audio>
+    <div class="audio-meta">
+      <span>&#128218; <strong>Paper</strong>&nbsp;Nakamura &amp; Uhlmann, <em>Global uniqueness for an inverse boundary problem arising in elasticity</em> (Inventiones, 1994)</span>
+      <span>&#127908; <strong>Voice</strong>&nbsp;Matilda</span>
+      <span>&#129504; <strong>Model</strong>&nbsp;eleven_v3</span>
+      <span>&#9201;&#65039; <strong>Duration</strong>&nbsp;16:06</span>
+      <span>&#127991;&#65039; <strong>Tags</strong>&nbsp;53 inline audio tags</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 3. INTRODUCTION                                     -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-inner">
+    <h2 class="section-header">Introduction</h2>
+    <div class="section-text">
+      <p>Somewhere outside, a phone buzzes in a pocket. The person carrying it is walking. They're working on a research project &mdash; not reading it on a screen, not sitting at a desk, just talking through it. A voice note goes out over Telegram. Claude grabs the PDF with one skill, surfaces the section that matters with another, answers a question by quoting the paper's own words back. The whole loop runs from a sidewalk. That part already works.</p>
+      <p>Except for that one thing. The NotebookLM audio podcast &mdash; the two-host conversational explainer of the paper &mdash; is the one piece of the flow with no clean way to ask for it. Vivek can say the words, but it wasn't clear how Claude could turn around and do it at the drop of a hat. And the moment matters more than it sounds. A walking researcher wants to listen to the paper, not just read it. When that request hits a wall, the whole mid-walk rhythm breaks. The natural ask should produce a natural answer. It didn't.</p>
+      <p>So the project went hunting. Agents fanned out across Google's official documentation, Anthropic's, MCP marketplaces, the general web &mdash; looking for any clean endpoint, any official SDK, any community wrapper good enough to install and forget. Google's audio-generation API turned out to be enterprise-only and unreachable from a personal account. The unofficial community wrappers could fire the request but couldn't tell you when the audio was ready. Nothing usable came back. So the project did something honest. It stopped trying to fix the original thing and built a different thing from scratch &mdash; a single-narrator podcast that paraphrases the paper in its own words and checks its substantive claims back against the source. No two-host banter. No guarantee of perfection &mdash; but grounded, and honest about being grounded rather than guessed.</p>
+      <p>What's playing at the top of this page is one of those. Sixteen minutes about a 1994 paper by Nakamura and Uhlmann on inverse elasticity &mdash; proving that the elastic properties inside a solid body are uniquely determined by the measurements you can make on its outer surface alone. The voice is Matilda, an ElevenLabs narrator. One host, not two. Shorter than NotebookLM. It isn't a copy of what was originally wanted &mdash; it turned out to be its own thing. The first time Vivek pressed play on it during a walk, he said it was better than the original.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 3b. THE ABSTRACTION LADDER                          -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="ladder-section">
+  <div class="section-inner">
+    <h2 class="section-header">The Abstraction Ladder</h2>
+    <div class="section-text">
+      <p>Here's the ladder Claude could climb to deliver that NotebookLM podcast on a walk. Five rungs of increasing cleanliness, each one fixing the defect of the rung below it. The top rung &mdash; Level 5 &mdash; is what got built. It only had to exist because the rung directly below it (Level 4) presumes a NotebookLM API or SDK that Vivek can use, and there isn't one.</p>
+    </div>
+  </div>
+
+  <div style="height:48px"></div>
+
+  <div class="ladder-container">
+    <div class="ladder-spine"></div>
+
+    <div class="ladder-rung rung-top">
+      <div class="rung-dot"></div>
+      <div class="rung-main">
+        <div class="rung-left">
+          <span class="rung-era">LEVEL 5</span>
+          <span class="rung-name">In-House + Background Agent</span>
+        </div>
+        <span class="rung-constraint">What got built. RESOLVED for NotebookLM.</span>
+      </div>
+    </div>
+
+    <div class="ladder-rung rung-highlight">
+      <div class="rung-dot"></div>
+      <div class="rung-main">
+        <div class="rung-left">
+          <span class="rung-era">LEVEL 4</span>
+          <span class="rung-name">API/SDK + Background Agent</span>
+        </div>
+        <span class="rung-constraint">Would resolve cleanly — if a NotebookLM API or SDK existed.</span>
+      </div>
+    </div>
+
+    <div class="ladder-rung">
+      <div class="rung-dot"></div>
+      <div class="rung-main">
+        <div class="rung-left">
+          <span class="rung-era">LEVEL 3</span>
+          <span class="rung-name">API/SDK + Main Agent</span>
+        </div>
+        <span class="rung-constraint">The call blocks — the main session is stuck inside one request.</span>
+      </div>
+    </div>
+
+    <div class="ladder-rung">
+      <div class="rung-dot"></div>
+      <div class="rung-main">
+        <div class="rung-left">
+          <span class="rung-era">LEVEL 2</span>
+          <span class="rung-name">MCP</span>
+        </div>
+        <span class="rung-constraint">MCP tools fire the call, but no signal when audio is done.</span>
+      </div>
+    </div>
+
+    <div class="ladder-rung">
+      <div class="rung-dot"></div>
+      <div class="rung-main">
+        <div class="rung-left">
+          <span class="rung-era">LEVEL 1</span>
+          <span class="rung-name">Computer Use</span>
+        </div>
+        <span class="rung-constraint">Clicking the NotebookLM UI. Wrong mode for a coding agent.</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="ladder-label">Each rung removes the prior rung's defect &uarr;</p>
+
+  <div class="section-inner" style="margin-top:56px">
+    <div class="section-text">
+      <p>Climb the ladder from the bottom up.</p>
+      <p><strong>Level 1: Computer Use.</strong> Claude opens NotebookLM in a browser and clicks the buttons by hand &mdash; like a person at a keyboard, except the person is an AI. It works the way watching someone else use your mouse "works": badly. And it's the wrong shape for Claude in the first place.</p>
+      <p><strong>Level 2: MCP.</strong> Instead of clicking buttons, Claude talks to a small helper program that already knows how to drive NotebookLM behind the scenes. Claude says "make a podcast about this paper" and the helper sends the request. The catch: the request goes out, and then silence. Nothing tells Claude when the audio is actually ready. Claude has to keep checking back, like someone refreshing their inbox.</p>
+      <p><strong>Level 3: API/SDK + Main Agent.</strong> Same kind of programmatic request, but now Claude itself makes the call. Claude fires the request — and then it's blocked inside that one call until the audio comes back. Not checking back over and over like Level 2; just stuck holding the line, doing nothing else. That works. But while Claude is held up on that single request, Vivek can't talk to it about anything else. The whole conversation is frozen, waiting on one task.</p>
+      <p><strong>Level 4: API/SDK + Background Agent.</strong> Same setup, but the checking-back happens off to one side, in a background helper that doesn't need Vivek's attention. The main conversation stays free. The helper waits, fetches the audio when it's done, and drops it in a folder. Twenty minutes later Vivek asks "is it ready?" &mdash; Claude looks, finds it, sends it over. That would be the clean answer.</p>
+      <p>Would be. Level 4 only works if there's a way for software to ask NotebookLM to make a podcast on demand &mdash; a real programmatic door. Vivek doesn't have one. Google's official channel is locked behind an enterprise paywall and isn't reachable from his personal account. The simpler standalone channel was shut down the day before the search began. The community workarounds are fragile and break easily. There's no foundation under Level 4.</p>
+      <p><strong>Level 5: In-House + Background Agent.</strong> So the project did the next thing: built the podcast itself from scratch, using pieces Vivek already had &mdash; the paper-reading tools, a text-to-speech engine, a hallucination check &mdash; all wrapped in the same background helper from Level 4. What's inside Level 5 is the architecture section below.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 4. ARCHITECTURE                                     -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="arch-section">
+  <h2 class="section-header">Architecture (Post-Pivot)</h2>
+
+  <div class="arch-diagram">
+    <div class="arch-legend">
+      <div class="legend-item">
+        <div class="legend-top">
+          <span class="legend-emoji">&#129302;</span>
+          <span class="legend-name" style="color:#f97316">Background Agent</span>
+        </div>
+        <span class="legend-model">Level-4 architecture, applied to a from-scratch pipeline</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-top">
+          <span class="legend-emoji">&#128218;</span>
+          <span class="legend-name" style="color:#38bdf8">Paper-Reading Stack</span>
+        </div>
+        <span class="legend-model">existing pocket-flow skills &rarr; grounding &amp; hallucination check</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-top">
+          <span class="legend-emoji">&#128190;</span>
+          <span class="legend-name" style="color:#4ade80">Markdown Context Store</span>
+        </div>
+        <span class="legend-model">all artifacts persist as .md files on disk</span>
+      </div>
+    </div>
+
+    <div class="arch-canvas">
+      <svg viewBox="0 0 980 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+            <circle cx="15" cy="15" r="0.5" fill="#1a1c2a"/>
+          </pattern>
+          <filter id="particleGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="nodeGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+          </marker>
+          <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/>
+          </marker>
+          <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4ade80"/>
+          </marker>
+          <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#888"/>
+          </marker>
+        </defs>
+
+        <rect width="980" height="520" fill="url(#dots)"/>
+
+        <!-- ═══ Background Agent dashed box ═══ -->
+        <rect x="158" y="58" width="586" height="242" rx="14"
+              fill="#f9731608" stroke="#f97316" stroke-width="2" stroke-dasharray="8,5"/>
+        <text class="scaffold-label" x="172" y="50" fill="#f97316">
+          &#129302; BACKGROUND AGENT &mdash; LEVEL-4 ARCHITECTURE
+        </text>
+
+        <!-- ═══ INPUT: Paper PDF (left-top) ═══ -->
+        <g class="node" data-step="12" onclick="selectStep(12)">
+          <rect x="34" y="86" width="94" height="48" rx="11" fill="#88888810" stroke="#888" stroke-width="1.5"/>
+          <text class="node-emoji" x="81" y="108" text-anchor="middle" fill="#888">&#128196;</text>
+          <text class="node-label" x="81" y="125" text-anchor="middle" fill="#888">Paper PDF</text>
+        </g>
+
+        <!-- ═══ OUTPUT: Drive → Inbox (left-bottom, serpentine end) ═══ -->
+        <g class="node" data-step="13" onclick="selectStep(13)">
+          <rect x="28" y="225" width="100" height="48" rx="11" fill="#88888810" stroke="#888" stroke-width="1.5"/>
+          <text class="node-emoji" x="78" y="247" text-anchor="middle" fill="#888">&#128231;</text>
+          <text class="node-label" x="78" y="264" text-anchor="middle" fill="#888">Drive &rarr; Inbox</text>
+        </g>
+
+        <!-- ═══ ROW 1 (top, left → right) ═══ -->
+        <!-- Step 1: parallel per-section swarm (exaggerated stacked sheets) -->
+        <g class="node" data-step="1" onclick="selectStep(1)">
+          <rect x="176" y="69" width="100" height="50" rx="11" fill="#f9731606" stroke="#f97316" stroke-width="1" opacity="0.4"/>
+          <rect x="176" y="74" width="100" height="50" rx="11" fill="#f973160a" stroke="#f97316" stroke-width="1.1" opacity="0.6"/>
+          <rect x="176" y="79" width="100" height="50" rx="11" fill="#f973160f" stroke="#f97316" stroke-width="1.3" opacity="0.82"/>
+          <rect x="176" y="84" width="100" height="50" rx="11" fill="#f9731618" stroke="#f97316" stroke-width="1.7"/>
+          <rect x="176" y="84" width="100" height="50" rx="11" fill="none" stroke="#fbbf24" stroke-width="2" filter="url(#nodeGlow)" pointer-events="none">
+            <animate attributeName="stroke-opacity" values="0.12;0.7;0.12" dur="2.6s" repeatCount="indefinite"/>
+          </rect>
+          <text class="step-num" x="184" y="97">1</text>
+          <text class="node-emoji" x="226" y="106" text-anchor="middle" fill="#f97316">&#128218;</text>
+          <text class="node-label" x="226" y="124" text-anchor="middle" fill="#f97316">Sections</text>
+          <text x="226" y="151" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="700" pointer-events="none">&#11088; parallel</text>
+          <text x="226" y="165" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="700" pointer-events="none">per-section agents</text>
+        </g>
+
+        <g class="node" data-step="2" onclick="selectStep(2)">
+          <rect x="312" y="84" width="100" height="50" rx="11" fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="step-num" x="320" y="97">2</text>
+          <text class="node-emoji" x="362" y="106" text-anchor="middle" fill="#f97316">&#9997;&#65039;</text>
+          <text class="node-label" x="362" y="124" text-anchor="middle" fill="#f97316">Synthesizer</text>
+        </g>
+
+        <g class="node" data-step="3" onclick="selectStep(3)">
+          <rect x="448" y="84" width="100" height="50" rx="11" fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="step-num" x="456" y="97">3</text>
+          <text class="node-emoji" x="498" y="106" text-anchor="middle" fill="#f97316">&#127919;</text>
+          <text class="node-label" x="498" y="124" text-anchor="middle" fill="#f97316">Narrative</text>
+        </g>
+
+        <g class="node" data-step="4" onclick="selectStep(4)">
+          <rect x="584" y="84" width="100" height="50" rx="11" fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="step-num" x="592" y="97">4</text>
+          <text class="node-emoji" x="634" y="106" text-anchor="middle" fill="#f97316">&#128737;&#65039;</text>
+          <text class="node-label" x="634" y="124" text-anchor="middle" fill="#f97316">Halluc. Check</text>
+        </g>
+
+        <!-- ═══ ROW 2 (bottom, right → left) ═══ -->
+        <g class="node" data-step="5" onclick="selectStep(5)">
+          <rect x="584" y="224" width="100" height="50" rx="11" fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="step-num" x="592" y="237">5</text>
+          <text class="node-emoji" x="634" y="246" text-anchor="middle" fill="#f97316">&#127912;</text>
+          <text class="node-label" x="634" y="264" text-anchor="middle" fill="#f97316">Tag Enrich</text>
+        </g>
+
+        <g class="node" data-step="6" onclick="selectStep(6)">
+          <rect x="448" y="224" width="100" height="50" rx="11" fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="step-num" x="456" y="237">6</text>
+          <text class="node-emoji" x="498" y="246" text-anchor="middle" fill="#f97316">&#127908;</text>
+          <text class="node-label" x="498" y="264" text-anchor="middle" fill="#f97316">audify-eleven</text>
+        </g>
+
+        <g class="node" data-step="7" onclick="selectStep(7)">
+          <rect x="312" y="224" width="100" height="50" rx="11" fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="step-num" x="320" y="237">7</text>
+          <text class="node-emoji" x="362" y="246" text-anchor="middle" fill="#f97316">&#9729;&#65039;</text>
+          <text class="node-label" x="362" y="264" text-anchor="middle" fill="#f97316">Upload+Share</text>
+        </g>
+
+        <!-- vertical drop: Halluc Check (b4) → Tag Enrich (b5) -->
+        <path id="p-4-5" d="M 634,134 L 634,224" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+
+        <!-- ═══ Paper-Reading skill stack (blue, below) ═══ -->
+        <rect x="172" y="358" width="520" height="82" rx="14"
+              fill="#38bdf808" stroke="#38bdf8" stroke-width="2" stroke-dasharray="8,5"/>
+        <g class="node" data-step="8" onclick="selectStep(8)">
+          <rect x="184" y="372" width="156" height="54" rx="11" fill="#38bdf810" stroke="#38bdf8" stroke-width="1.5"/>
+          <text class="step-num" x="192" y="385">8</text>
+          <text class="node-emoji" x="262" y="399" text-anchor="middle" fill="#38bdf8">&#10067;</text>
+          <text class="node-label" x="262" y="417" text-anchor="middle" fill="#38bdf8">ask-question</text>
+        </g>
+        <g class="node" data-step="9" onclick="selectStep(9)">
+          <rect x="350" y="372" width="156" height="54" rx="11" fill="#38bdf810" stroke="#38bdf8" stroke-width="1.5"/>
+          <text class="step-num" x="358" y="385">9</text>
+          <text class="node-emoji" x="428" y="399" text-anchor="middle" fill="#38bdf8">&#128269;</text>
+          <text class="node-label" x="428" y="417" text-anchor="middle" fill="#38bdf8">find-evidence</text>
+        </g>
+        <g class="node" data-step="10" onclick="selectStep(10)">
+          <rect x="516" y="372" width="156" height="54" rx="11" fill="#38bdf810" stroke="#38bdf8" stroke-width="1.5"/>
+          <text class="step-num" x="524" y="385">10</text>
+          <text class="node-emoji" x="594" y="399" text-anchor="middle" fill="#38bdf8">&#9999;&#65039;</text>
+          <text class="node-label" x="594" y="417" text-anchor="middle" fill="#38bdf8">text-to-highlight</text>
+        </g>
+        <text class="scaffold-label" x="174" y="456" fill="#38bdf8">
+          &#128218; PAPER-READING SKILL STACK &mdash; HALLUCINATION CHECK
+        </text>
+
+        <!-- ═══ MD Context Store (green cylinder, right) ═══ -->
+        <g class="node" data-step="11" onclick="selectStep(11)">
+          <ellipse cx="872" cy="94" rx="68" ry="11" fill="#4ade8015" stroke="#4ade80" stroke-width="1.5"/>
+          <rect x="804" y="94" width="136" height="74" fill="#4ade8015" stroke="#4ade80" stroke-width="1.5"/>
+          <ellipse cx="872" cy="168" rx="68" ry="11" fill="#4ade8025" stroke="#4ade80" stroke-width="1.5"/>
+          <text class="node-emoji" x="872" y="124" text-anchor="middle" fill="#4ade80">&#128190;</text>
+          <text class="node-label" x="872" y="144" text-anchor="middle" fill="#4ade80">MD Context Store</text>
+          <text x="872" y="200" text-anchor="middle" fill="#4ade80" font-size="11.5" font-style="italic">.md files persist on disk</text>
+        </g>
+
+        <!-- ═══ Data-flow arrows ═══ -->
+        <path id="p-in-1" d="M 128,110 L 176,109" fill="none" stroke="#888" stroke-width="2" stroke-opacity="0.5" marker-end="url(#arrowGray)"/>
+        <path id="p-1-2" d="M 276,109 L 312,109" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <path id="p-2-3" d="M 412,109 L 448,109" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <path id="p-3-4" d="M 548,109 L 584,109" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <path id="p-5-6" d="M 584,249 L 548,249" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <path id="p-6-7" d="M 448,249 L 412,249" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#arrowOrange)"/>
+        <path id="p-7-out" d="M 312,249 L 132,249" fill="none" stroke="#888" stroke-width="2" stroke-opacity="0.6" marker-end="url(#arrowGray)"/>
+
+        <!-- Halluc Check → Paper-Reading box: Manhattan route (out, down, in) -->
+        <path id="p-4-pr" d="M 684,118 L 762,118 L 762,398 L 692,398"
+              fill="none" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.75"
+              stroke-dasharray="7,4" marker-end="url(#arrowBlue)"/>
+
+        <!-- Green MD-store junction node + clean hub connections -->
+        <circle cx="744" cy="178" r="11" fill="none" stroke="#4ade80" stroke-width="1" stroke-opacity="0.4"/>
+        <circle cx="744" cy="178" r="6" fill="#4ade80" stroke="#0f1019" stroke-width="1.5"/>
+        <path d="M 744,178 C 772,172 788,158 804,150" fill="none" stroke="#4ade80" stroke-width="1.6" stroke-opacity="0.6" stroke-dasharray="4,3"/>
+        <path d="M 684,128 C 710,140 730,162 742,173" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.55" stroke-dasharray="4,3"/>
+        <path d="M 684,232 C 710,220 730,196 742,184" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-opacity="0.55" stroke-dasharray="4,3"/>
+
+        <!-- ═══ Animated particles ═══ -->
+        <circle r="3.2" fill="#f97316" filter="url(#particleGlow)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="0s"><mpath href="#p-1-2"/></animateMotion></circle>
+        <circle r="3.2" fill="#f97316" filter="url(#particleGlow)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="0.5s"><mpath href="#p-2-3"/></animateMotion></circle>
+        <circle r="3.2" fill="#f97316" filter="url(#particleGlow)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="1.0s"><mpath href="#p-3-4"/></animateMotion></circle>
+        <circle r="3.2" fill="#f97316" filter="url(#particleGlow)"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.5s"><mpath href="#p-4-5"/></animateMotion></circle>
+        <circle r="3.2" fill="#f97316" filter="url(#particleGlow)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="2.0s"><mpath href="#p-5-6"/></animateMotion></circle>
+        <circle r="3.2" fill="#f97316" filter="url(#particleGlow)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="2.5s"><mpath href="#p-6-7"/></animateMotion></circle>
+        <circle r="3.2" fill="#888" filter="url(#particleGlow)"><animateMotion dur="2.6s" repeatCount="indefinite" begin="3.0s"><mpath href="#p-7-out"/></animateMotion></circle>
+        <circle r="2.8" fill="#38bdf8" filter="url(#particleGlow)"><animateMotion dur="4s" repeatCount="indefinite" begin="0s"><mpath href="#p-4-pr"/></animateMotion></circle>
+      </svg>
+    </div>
+
+    <div class="arch-detail">
+      <div class="d-icon" id="d-icon">&#129302;</div>
+      <div class="d-name" id="d-name">Click any step to see how it works</div>
+      <div class="d-desc" id="d-desc">The orange dashed box is the Level-4 background-agent boundary &mdash; everything inside it runs autonomously once the orchestrator fires the skill. The blue dashed box is the paper-reading skill stack Vivek already had in his pocket flow, now wired into the hallucination-check phase. The green cylinder is the markdown-context store every step reads and writes.</div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="section-text">
+      <p>This is Level 5 unpacked, and three principles drive its shape: efficiency (a background agent doing the work in parallel), accuracy (claims grounded in the paper, and honest about it), and scaffolding (the single-host emotional layer). The orange dashed box is the background agent. Inside, a seven-phase pipeline drafts a narrative from the paper, grounds its substantive claims back against the source PDF, layers in ElevenLabs audio tags, and synthesizes the final mp3.</p>
+      <p>The blue dashed box is Vivek's pre-existing paper-reading skill stack &mdash; called from the hallucination-check phase to find verbatim grounding for its claims. The green cylinder on the right is the markdown context store, where every artifact persists as a versioned file.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 5. DESIGN PHILOSOPHY                                -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-inner">
+    <h2 class="section-header">Design Philosophy</h2>
+    <div class="section-text">
+      <p>The pattern that runs underneath every project on this stack &mdash; including this one &mdash; is the same, and it doesn't begin at a keyboard. It begins out loud. Vivek dictates the project &mdash; usually mid-walk, into Telegram &mdash; in long voice messages that arrive as audio attachments. The voice-message hook transcribes each one on arrival, and over the course of a few exchanges, the raw dictation gets shaped into a precise specification document. Claude probes for missing constraints, surfaces tensions, suggests structure. Vivek redirects, sharpens, corrects. When the conversation has carved out a complete picture &mdash; motivation, scope, phases, exit criteria, cardinal constraints, risks, out-of-scope items &mdash; the result lands on disk as a markdown file: <span class="mono">problem_statement.md</span> for this project, <span class="mono">roadmap.md</span>, <span class="mono">podcastify-plus-with-eleven-labs.md</span>, and so on.</p>
+      <p>Then comes the trigger. One line: <span class="mono">/goal @&lt;the-document&gt;.md and take ALL DECISIONS AUTONOMOUSLY</span>. The agent reads the contract, builds an internal task list, and executes phase by phase without further input. No interactive back-and-forth. No mid-run clarifying questions. Judgment calls get made and documented in the final summary. Vivek walks away. The deliverable lands in his inbox.</p>
+    </div>
+  </div>
+
+  <div class="voiceflow-wrap">
+    <div class="voiceflow-canvas">
+      <svg viewBox="0 0 980 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="dots-vf" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+            <circle cx="15" cy="15" r="0.5" fill="#1a1c2a"/>
+          </pattern>
+          <filter id="vfGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="vfParticle" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="vfArrowGray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#888"/>
+          </marker>
+          <marker id="vfArrowBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/>
+          </marker>
+          <marker id="vfArrowOrange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+          </marker>
+          <marker id="vfArrowGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4ade80"/>
+          </marker>
+        </defs>
+        <rect width="980" height="240" fill="url(#dots-vf)"/>
+
+        <g class="vnode" data-vstep="1" onclick="selectVStep(1)">
+          <rect x="30" y="90" width="110" height="60" rx="12"
+                fill="#88888810" stroke="#888" stroke-width="1.5"/>
+          <text class="vnode-emoji" x="85" y="118" text-anchor="middle" fill="#888">&#127908;</text>
+          <text class="vnode-label" x="85" y="140" text-anchor="middle" fill="#888">Voice</text>
+        </g>
+
+        <g class="vnode" data-vstep="2" onclick="selectVStep(2)">
+          <rect x="180" y="90" width="135" height="60" rx="12"
+                fill="#38bdf810" stroke="#38bdf8" stroke-width="1.5"/>
+          <text class="vnode-emoji" x="247" y="118" text-anchor="middle" fill="#38bdf8">&#128241;</text>
+          <text class="vnode-label" x="247" y="140" text-anchor="middle" fill="#38bdf8">Telegram channel</text>
+        </g>
+
+        <g class="vnode" data-vstep="3" onclick="selectVStep(3)">
+          <rect x="355" y="90" width="135" height="60" rx="12"
+                fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="vnode-emoji" x="422" y="118" text-anchor="middle" fill="#f97316">&#129302;</text>
+          <text class="vnode-label" x="422" y="140" text-anchor="middle" fill="#f97316">Claude Code</text>
+        </g>
+
+        <g class="vnode" data-vstep="4" onclick="selectVStep(4)">
+          <rect x="530" y="90" width="135" height="60" rx="12"
+                fill="#4ade8010" stroke="#4ade80" stroke-width="1.5"/>
+          <text class="vnode-emoji" x="597" y="118" text-anchor="middle" fill="#4ade80">&#128221;</text>
+          <text class="vnode-label" x="597" y="140" text-anchor="middle" fill="#4ade80">Spec .md</text>
+        </g>
+
+        <g class="vnode" data-vstep="5" onclick="selectVStep(5)">
+          <rect x="705" y="90" width="125" height="60" rx="12"
+                fill="#f9731610" stroke="#f97316" stroke-width="1.5"/>
+          <text class="vnode-emoji" x="767" y="118" text-anchor="middle" fill="#f97316">&#9889;</text>
+          <text class="vnode-label" x="767" y="140" text-anchor="middle" fill="#f97316">/goal trigger</text>
+        </g>
+
+        <g class="vnode" data-vstep="6" onclick="selectVStep(6)">
+          <rect x="870" y="90" width="100" height="60" rx="12"
+                fill="#88888810" stroke="#888" stroke-width="1.5"/>
+          <text class="vnode-emoji" x="920" y="118" text-anchor="middle" fill="#888">&#128231;</text>
+          <text class="vnode-label" x="920" y="140" text-anchor="middle" fill="#888">Inbox</text>
+        </g>
+
+        <path id="vp-1-2" d="M 140,120 L 180,120" fill="none" stroke="#888" stroke-width="2" marker-end="url(#vfArrowGray)"/>
+        <path id="vp-2-3" d="M 315,120 L 355,120" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#vfArrowBlue)"/>
+        <path id="vp-3-4" d="M 490,120 L 530,120" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#vfArrowOrange)"/>
+        <path id="vp-4-5" d="M 665,120 L 705,120" fill="none" stroke="#4ade80" stroke-width="2" marker-end="url(#vfArrowGreen)"/>
+        <path id="vp-5-6" d="M 830,120 L 870,120" fill="none" stroke="#f97316" stroke-width="2" marker-end="url(#vfArrowOrange)"/>
+
+        <circle r="3" fill="#888" filter="url(#vfParticle)"><animateMotion dur="2s" repeatCount="indefinite" begin="0s"><mpath href="#vp-1-2"/></animateMotion></circle>
+        <circle r="3" fill="#38bdf8" filter="url(#vfParticle)"><animateMotion dur="2s" repeatCount="indefinite" begin="0.4s"><mpath href="#vp-2-3"/></animateMotion></circle>
+        <circle r="3" fill="#f97316" filter="url(#vfParticle)"><animateMotion dur="2s" repeatCount="indefinite" begin="0.8s"><mpath href="#vp-3-4"/></animateMotion></circle>
+        <circle r="3" fill="#4ade80" filter="url(#vfParticle)"><animateMotion dur="2s" repeatCount="indefinite" begin="1.2s"><mpath href="#vp-4-5"/></animateMotion></circle>
+        <circle r="3" fill="#f97316" filter="url(#vfParticle)"><animateMotion dur="2s" repeatCount="indefinite" begin="1.6s"><mpath href="#vp-5-6"/></animateMotion></circle>
+      </svg>
+    </div>
+    <div class="voiceflow-detail">
+      <div class="vd-icon" id="vd-icon">&#127908;</div>
+      <div class="vd-name" id="vd-name">Click any step to see what happens</div>
+      <div class="vd-desc" id="vd-desc">Six steps from voice memo to deliverable in the inbox. The four middle steps (Telegram &rarr; Claude &rarr; Spec &rarr; /goal) are the project-shaping loop; the outer two are dictation in and deliverable out.</div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="section-text">
+      <p>This pattern works for a non-obvious reason. The conversation that turns a dictated voice memo into a specification document is itself the highest-leverage work in the whole project. By the time the markdown file is precise enough to fire against, the hard thinking is already done &mdash; the constraints are named, the gates are honest, the scope is bounded. What the agent inherits is execution, which is exactly the kind of work AI agents are good at. The pattern fails when the spec is fuzzy. It succeeds when the spec names the constraints honestly &mdash; including the ones that should kill the project if they don't pan out.</p>
+      <p>This very project is an example. The contract was <span class="mono">problem_statement.md</span>: motivation, the 4-level ladder, Phase 1's branch logic (terminate if nothing surfaces, proceed if something does), Phase 2's two-test plan. When Phase 1 came back with verdict (c), the contract's branch logic said proceed-with-build-it-yourself; the autonomous run took that branch without further input. The voice-shaped, markdown-committed contract <em>is</em> the discipline that keeps the agent honest when the ladder breaks.</p>
+      <p>And the result ships the way every artifact here does &mdash; as a git repository: not a locked product but a malleable blueprint, a Claude Code skill you clone, point Claude at, and reshape to fit your own agents.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- 7. GITHUB FOOTER                                    -->
+<!-- ════════════════════════════════════════════════════ -->
+<footer class="github-footer">
+  <a href="https://github.com/VivekKarmarkar/nblm-podcast-api" target="_blank" rel="noopener noreferrer">
+    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+    </svg>
+    View on GitHub
+  </a>
+</footer>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- SCRIPTS                                             -->
+<!-- ════════════════════════════════════════════════════ -->
+<script>
+const stepData = {
+  1: { icon: "📚", name: "1. Sections (parallel swarm)",
+       desc: "pdftotext extracts the paper and its section structure is discovered. Then a parallel swarm — one agent per section — writes the per-section explanations simultaneously, each already obeying the project's narration style. They fan into the synthesizer (step 2). Output: sections.json + section_explanations/*.md." },
+  2: { icon: "✍️", name: "2. Synthesizer",
+       desc: "Connect the per-section explanations into one flowing draft_story.md — a connected story, not concatenation." },
+  3: { icon: "🎯", name: "3. Narrative",
+       desc: "Identify the ONE load-bearing message in the paper. Write narrative_refined.md with a strong hook + 6-beat arc (background → what → how → proof → limitations → where it leaves us). Target 13-15K chars." },
+  4: { icon: "🛡️", name: "4. Hallucination Check",
+       desc: "For each substantive claim, call the blue paper-reading skill stack below to find verbatim PDF grounding. Append a YAML journal entry. Correct anything CONTRADICTED or SILENT using the verbatim excerpt as ground truth. Write narrative_final.md + hallucination_audit.md." },
+  5: { icon: "🎨", name: "5. Tag Enrichment",
+       desc: "Read narrative_final.md. Insert eleven_v3 audio tags ([warmly], [excited], [whispers], [awe], [sigh], [pause]) at strategic moments — about 1 tag per 2 sentences. NEVER modify the spoken words. Write narrative_v3_tagged.md." },
+  6: { icon: "🎙️", name: "6. audify-eleven",
+       desc: "Mechanical TTS engine. Chunks the tagged narrative under v3's 5000-char cap, calls ElevenLabs text_to_speech.convert per chunk with Matilda voice + tuned VoiceSettings, ffmpeg-concats the chunk mp3s losslessly. Output: podcast.mp3." },
+  7: { icon: "☁️", name: "7. Upload + Share",
+       desc: "gws drive files create (with cd into the mp3 dir to dodge the gws path bug) + gws drive permissions create. The agent that owns the mp3 also owns the share. Returns a webViewLink." },
+  8: { icon: "❓", name: "/ask-question-about-paper",
+       desc: "Ask the paper a direct question, get the verbatim text excerpt back with page number + structural context. Appends a YAML journal entry. Handles 'paper doesn't answer this' by recording status: null. Pre-existing skill from the highlighting flow." },
+  9: { icon: "🔍", name: "/find-evidence-in-paper",
+       desc: "Find verbatim text in the PDF that SUPPORTS, CONTRADICTS, PARTIALLY_SUPPORTS, or is SILENT on a user claim. Appends a YAML journal entry with the verbatim excerpt, page number, and AI commentary on the evidential relationship. Load-bearing for hallucination prevention." },
+  10: { icon: "✏️", name: "/text-to-highlight-in-paper",
+        desc: "Locate a verbatim excerpt in the PDF given a fuzzy context cue (verbatim quote, partial quote, or descriptive hint). Appends a YAML journal entry. The grounding layer that lets us point Cat-2 highlighting skills at the right text." },
+  11: { icon: "💾", name: "MD Context Store",
+        desc: "All artifacts persist as versioned markdown files on disk — sections.json, draft_story.md, narrative_refined.md, narrative_final.md, narrative_v3_tagged.md, hallucination_audit.md, the find-evidence-in-paper journal. Human-readable, agent-parseable, git-diffable. The pipeline's persistent memory." },
+  12: { icon: "📄", name: "Paper PDF (input)",
+        desc: "Any research paper. Local file path or a paper reference (DOI, arXiv ID, title, URL) when invoked via /download-podcastify-plus-and-share — /paper-download-hack runs synchronously in the orchestrator to resolve a reference into a real PDF on disk before handing off to the background agent." },
+  13: { icon: "📧", name: "Drive → Inbox (output)",
+        desc: "gws drive files create uploads the mp3 to Google Drive (under the agent's authenticated account); gws drive permissions create grants reader access to the recipient email (default: vivekjobapp123@gmail.com). The agent returns the webViewLink. The recipient's phone gets a Drive notification — they tap, the mp3 plays inline." },
+};
+
+function selectStep(n) {
+  document.querySelectorAll('.arch-diagram .node rect').forEach(r => {
+    r.setAttribute('stroke-width', '1.5');
+    r.removeAttribute('filter');
+  });
+  const s = stepData[n];
+  const node = document.querySelector('.arch-diagram .node[data-step="' + n + '"] rect');
+  if (node) {
+    node.setAttribute('stroke-width', '3');
+    node.setAttribute('filter', 'url(#nodeGlow)');
+  }
+  document.getElementById('d-icon').textContent = s.icon;
+  document.getElementById('d-name').textContent = s.name;
+  document.getElementById('d-desc').textContent = s.desc;
+}
+
+const vStepData = {
+  1: { icon: "🎙️", name: "Voice (dictation)",
+       desc: "Vivek dictates the project into Telegram, usually mid-walk — long voice messages, raw thinking aloud. The dictation is what kicks off every project on this stack." },
+  2: { icon: "📱", name: "Telegram channel",
+       desc: "The voice arrives as an .oga attachment on the Telegram channel wired into Claude Code. A voice-transcription hook downloads the file and transcribes it on arrival, so Claude sees text instead of opaque audio." },
+  3: { icon: "🤖", name: "Claude Code (shaping)",
+       desc: "Claude reads the transcript, asks back the missing constraints, surfaces tensions, and helps shape the raw dictation into a precise multi-section specification — over a few voice-message exchanges, the picture sharpens." },
+  4: { icon: "📝", name: "Spec markdown file",
+       desc: "The shaped spec lands on disk as a markdown file: motivation, scope, phases with exit criteria, cardinal constraints, risks, out-of-scope items. Human-readable, agent-parseable, git-diffable. Vivek can review or edit before firing." },
+  5: { icon: "⚡", name: "/goal trigger",
+       desc: "One command: /goal @<doc>.md and take ALL DECISIONS AUTONOMOUSLY. Claude reads the contract, builds an internal task list, and executes phase by phase — no interactive back-and-forth, no clarifying questions, judgment calls documented in the final summary." },
+  6: { icon: "📧", name: "Deliverable to inbox",
+       desc: "When the autonomous run completes, the deliverable (mp3, PDF, paper bundle, dataset — whatever the spec named) lands in Vivek's Google Drive shared with vivekjobapp123@gmail.com. His phone buzzes; he taps and plays. The loop closes." },
+};
+
+function selectVStep(n) {
+  document.querySelectorAll('.voiceflow-canvas .vnode rect').forEach(r => {
+    r.setAttribute('stroke-width', '1.5');
+    r.removeAttribute('filter');
+  });
+  const s = vStepData[n];
+  const node = document.querySelector('.voiceflow-canvas .vnode[data-vstep="' + n + '"] rect');
+  if (node) {
+    node.setAttribute('stroke-width', '3');
+    node.setAttribute('filter', 'url(#vfGlow)');
+  }
+  document.getElementById('vd-icon').textContent = s.icon;
+  document.getElementById('vd-name').textContent = s.name;
+  document.getElementById('vd-desc').textContent = s.desc;
+}
+</script>
+</body>
+</html>
